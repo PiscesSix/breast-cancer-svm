@@ -1,0 +1,446 @@
+% =============================================================================
+%  Báo cáo trình chiếu — da2: Triển khai mô hình SVM chẩn đoán ung thư vú
+%  Biên dịch:  latexmk -xelatex da2_slide.tex   (Overleaf: Compiler = XeLaTeX)
+%  Số liệu: macro trong metrics_data.tex, sinh bằng python docs/latex/make_tex_data.py
+% =============================================================================
+\documentclass[aspectratio=169,12pt]{beamer}
+
+\usetheme{Madrid}
+\usecolortheme{whale}
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{caption}{\insertcaption}
+\setbeamerfont{block title}{size=\normalsize}
+
+\usepackage{fontspec}
+\setmainfont{Latin Modern Roman}
+\setsansfont{Latin Modern Sans}
+\setmonofont{DejaVu Sans Mono}[Scale=0.78]
+
+\usepackage[vietnamese]{babel}
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta}
+
+\graphicspath{{../../reports/figures/}{../screenshots/}{./}}
+
+% Địa chỉ dịch vụ trên Render: đổi bằng  python docs/latex/set_service_url.py <URL mới>
+
+\definecolor{rose}{HTML}{C2255C}
+\definecolor{warnbg}{HTML}{FFF4E5}
+\setbeamercolor{alerted text}{fg=rose}
+\definecolor{codebg}{HTML}{F5F5FA}
+\lstset{
+  backgroundcolor=\color{codebg},
+  basicstyle=\ttfamily\scriptsize,
+  keywordstyle=\color{blue!70!black}\bfseries,
+  stringstyle=\color{teal},
+  commentstyle=\color{gray}\itshape,
+  breaklines=true, showstringspaces=false,
+  frame=single, rulecolor=\color{gray!40},
+  extendedchars=true, inputencoding=utf8,
+}
+
+\input{metrics_data}
+
+\newcommand{\canhbao}{%
+  \colorbox{warnbg}{\parbox{0.96\textwidth}{\small\textbf{Chỉ phục vụ mục đích giáo dục} --- không thay thế
+  bác sĩ, xét nghiệm đã thẩm định hay chẩn đoán y khoa.}}}
+
+\title[SVM chẩn đoán ung thư vú]{Triển khai mô hình SVM\\chẩn đoán ung thư vú}
+\subtitle{Breast Cancer Wisconsin · FastAPI · Render}
+\author{La Thị Mỹ Hoà}
+\institute{Lớp 24CKDL \\ Học phần: Học máy nâng cao}
+\date{}
+
+\begin{document}
+
+\begin{frame}[plain]
+  \titlepage
+  \begin{center}\small
+    \texttt{https://breast-cancer-svm-api.onrender.com}
+  \end{center}
+\end{frame}
+
+\begin{frame}{Nội dung}
+  \tableofcontents
+\end{frame}
+
+% =============================================================================
+\section{Bài toán và dữ liệu}
+% =============================================================================
+
+\begin{frame}{Bài toán và phạm vi sử dụng}
+  \begin{columns}[T]
+    \begin{column}{0.55\textwidth}
+      \textbf{Đầu vào:} \NFeatures{} đặc trưng hình thái nhân tế bào, đo trên ảnh chọc hút kim nhỏ (FNA)
+      \vspace{6pt}
+
+      \textbf{Đầu ra:} khối u \alert{ác tính} hay lành tính, kèm xác suất
+      \vspace{6pt}
+
+      \textbf{Điểm khác biệt:} hai loại sai không ngang nhau --- bỏ sót ca ác tính nguy hiểm hơn báo động nhầm
+    \end{column}
+    \begin{column}{0.42\textwidth}
+      \begin{block}{Nguyên tắc an toàn}
+        \small
+        \begin{itemize}
+          \item Không gửi tên, mã bệnh nhân
+          \item Không dùng một xác suất đơn lẻ để quyết định điều trị
+          \item Dùng thật cần kiểm định ngoại bộ và phê duyệt chuyên môn
+        \end{itemize}
+      \end{block}
+    \end{column}
+  \end{columns}
+  \vfill
+  \canhbao
+\end{frame}
+
+\begin{frame}{Dữ liệu: Breast Cancer Wisconsin (Diagnostic)}
+  \begin{columns}[T]
+    \begin{column}{0.48\textwidth}
+      \begin{itemize}
+        \item \texttt{load\_breast\_cancer}: \NSamples{} mẫu, \NFeatures{} đặc trưng
+        \item \NMalignant{} ác tính (\PctMalignant) · \NBenign{} lành tính
+        \item Nhãn: \alert{0 = malignant}, 1 = benign --- luôn đọc \texttt{target\_names}
+        \item 10 đại lượng × \{mean, error, worst\}
+        \item \NZeroFeatures{} đặc trưng concavity bằng 0 ở \NZeroRows{} mẫu thật $\Rightarrow$ schema cho phép 0
+      \end{itemize}
+    \end{column}
+    \begin{column}{0.5\textwidth}
+      \centering
+      \includegraphics[width=\textwidth]{02_phan_phoi_dac_trung.png}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Kiến trúc tổng thể}
+  \centering
+  \begin{tikzpicture}[node distance=4mm and 6mm, box/.style={draw, rounded corners, fill=gray!8, minimum height=9mm,
+    align=center, font=\small}, >={Stealth[length=2mm]}]
+    \node[box] (data) {Dữ liệu};
+    \node[box, right=of data] (prep) {Chia 80/20\\ Scaler};
+    \node[box, right=of prep] (svm) {SVC RBF\\ GridSearch};
+    \node[box, right=of svm] (cal) {Hiệu chỉnh\\+ ngưỡng};
+    \node[box, right=of cal] (art) {Artifact\\+ metadata};
+    \node[box, below=10mm of art] (api) {FastAPI\\+ UI};
+    \node[box, left=of api] (test) {pytest\\+ CI};
+    \node[box, left=of test] (gh) {GitHub};
+    \node[box, left=of gh] (render) {Render};
+    \draw[->] (data) -- (prep); \draw[->] (prep) -- (svm); \draw[->] (svm) -- (cal); \draw[->] (cal) -- (art);
+    \draw[->] (art) -- (api); \draw[->] (api) -- (test); \draw[->] (test) -- (gh); \draw[->] (gh) -- (render);
+  \end{tikzpicture}
+  \vspace{10pt}
+  \begin{block}{Nguyên tắc}
+    \texttt{StandardScaler} và \texttt{SVC} trong \alert{cùng một Pipeline}, lưu cả pipeline.
+    \texttt{train.py} huấn luyện và xuất artifact; \texttt{app/main.py} chỉ nạp và phục vụ.
+  \end{block}
+\end{frame}
+
+% =============================================================================
+\section{Mô hình và huấn luyện}
+% =============================================================================
+
+\begin{frame}{SVM rút gọn}
+  \begin{itemize}
+    \item Lề mềm có trọng số lớp:
+      $\displaystyle \min_{\mathbf{w},b,\boldsymbol\xi}\ \tfrac12\lVert\mathbf{w}\rVert^2 + \sum_i C_{y_i}\xi_i$,
+      \quad $y_i(\mathbf{w}^\top\phi(\mathbf{x}_i)+b)\ge 1-\xi_i$
+    \item \texttt{class\_weight="balanced"}: $C_k = C\cdot\frac{n}{2n_k}$ --- lỗi ở lớp ác tính (ít hơn) bị phạt nặng hơn
+    \item Kernel RBF: $K(\mathbf{x},\mathbf{x}') = \exp(-\gamma\lVert\mathbf{x}-\mathbf{x}'\rVert^2)$
+    \item Hàm quyết định chỉ phụ thuộc \alert{vector hỗ trợ}:
+      $f(\mathbf{x}) = \sum_{i\in\mathcal S}\alpha_i y_i K(\mathbf{x}_i,\mathbf{x}) + b$
+    \item SVM cho \emph{điểm}, không cho xác suất $\Rightarrow$ cần \alert{hiệu chỉnh} (Platt / isotonic)
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Pipeline và tối ưu siêu tham số}
+  \begin{columns}[T]
+    \begin{column}{0.46\textwidth}
+      \begin{itemize}
+        \item 80/20, \texttt{stratify}, \texttt{random\_state=\RandomState}: \NTrain{} train / \NTest{} test
+        \item \texttt{GridSearchCV} + \texttt{StratifiedKFold(5)} \alert{chỉ trên train}
+        \item $C\in\{0.1, 1, 10, 100\}$, $\gamma\in\{\text{scale}, 0.001, 0.01, 0.1\}$
+        \item Chấm bằng \GridScoring
+      \end{itemize}
+      \vspace{6pt}
+      Chọn \textbf{$C=\BestC$, $\gamma=\BestGamma$}: \GridCVMean{} $\pm$ \GridCVStd
+    \end{column}
+    \begin{column}{0.52\textwidth}
+      \centering
+      \includegraphics[width=\textwidth]{05_grid_search.png}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Hiệu chỉnh xác suất}
+  \begin{columns}[T]
+    \begin{column}{0.52\textwidth}
+      \centering
+      \includegraphics[width=\textwidth]{06_hieu_chinh_xac_suat.png}
+    \end{column}
+    \begin{column}{0.46\textwidth}
+      \small
+      \begin{itemize}
+        \item So bằng \alert{Brier score} trên xác suất out-of-fold của tập train
+        \item \texttt{SVC(probability=True)} thấp nhất (\CalibBaselineBrier) nhưng \alert{deprecated từ scikit-learn 1.9},
+              bị xoá ở 1.11
+        \item Chọn \CalibChosen{} (\CalibChosenBrier) --- cách scikit-learn khuyên thay thế
+      \end{itemize}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Chọn ngưỡng theo sensitivity}
+  \begin{columns}[T]
+    \begin{column}{0.56\textwidth}
+      \centering
+      \includegraphics[width=\textwidth]{07_chon_nguong.png}
+    \end{column}
+    \begin{column}{0.42\textwidth}
+      \small
+      \begin{itemize}
+        \item Ngưỡng \alert{cao nhất} còn giữ sensitivity out-of-fold $\ge \TargetSens$
+        \item $\Rightarrow$ \textbf{$t = \Threshold$}; ngưỡng 0,5 chỉ đạt \CVHalfSens
+        \item Khoá ngưỡng \alert{trước} khi chạy tập test
+        \item API: ác tính nếu $P \ge t$ --- không dùng \texttt{predict()}, nhãn và xác suất luôn nhất quán
+      \end{itemize}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+% =============================================================================
+\section{Kết quả}
+% =============================================================================
+
+\begin{frame}{Kết quả: train · CV · test}
+  \begin{columns}[T]
+    \begin{column}{0.56\textwidth}
+      \footnotesize
+      \begin{tabular}{@{}lrrrrr@{}}
+        \toprule
+        Tập & Sens. & Spec. & Prec. & AUC & FN \\
+        \midrule
+        \MetricRowsShort
+        \bottomrule
+      \end{tabular}
+      \vspace{8pt}
+
+      \small Test: bắt \textbf{\TestTP/\TestMalignant} ca ác tính, \TestFP{} báo nhầm / \TestBenign{} lành tính.
+      Khoảng cách train--CV nhỏ: không quá khớp rõ rệt.
+    \end{column}
+    \begin{column}{0.42\textwidth}
+      \centering
+      \includegraphics[width=0.92\textwidth]{08_ma_tran_nham_lan.png}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{ROC, PR và độ tin cậy của xác suất}
+  \begin{columns}[T]
+    \begin{column}{0.64\textwidth}
+      \centering
+      \includegraphics[width=\textwidth]{09_roc_pr.png}
+    \end{column}
+    \begin{column}{0.34\textwidth}
+      \centering
+      \includegraphics[width=\textwidth]{10_hieu_chinh.png}
+    \end{column}
+  \end{columns}
+  \vspace{4pt}
+  \small ROC-AUC \TestAUC, PR-AUC \TestPRAUC, Brier \TestBrier{} trên test; đường hiệu chỉnh bám đường chéo.
+\end{frame}
+
+\begin{frame}{Phân tích lỗi --- nhìn thẳng vào ngưỡng}
+  \begin{columns}[T]
+    \begin{column}{0.5\textwidth}
+      \centering
+      \includegraphics[width=\textwidth]{11_phan_phoi_xac_suat.png}
+    \end{column}
+    \begin{column}{0.48\textwidth}
+      \small
+      \begin{itemize}
+        \item \TestFN{} ca ác tính bị bỏ sót với $P = \MissedProba$ --- không ngưỡng hợp lý nào bắt được
+        \item \TestFP{} ca báo nhầm, \FPBelowHalf{} ca chỉ vì ngưỡng đã hạ
+        \item Trên test này, ngưỡng 0,5 cùng sensitivity nhưng ít báo nhầm hơn (\HalfFP)
+        \item Nhưng ngưỡng chọn \alert{trên CV}, nơi 0,5 không đạt mục tiêu --- chọn theo test là rò rỉ
+      \end{itemize}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+% =============================================================================
+\section{API và giao diện}
+% =============================================================================
+
+\begin{frame}[fragile]{Thiết kế API}
+  \begin{columns}[T]
+    \begin{column}{0.5\textwidth}
+      \footnotesize
+      \begin{tabular}{@{}ll@{}}
+        \toprule
+        \texttt{GET /health} & 200 / \alert{503} nếu artifact lỗi \\
+        \texttt{GET /metadata} & phiên bản, 30 đặc trưng, ngưỡng \\
+        \texttt{POST /predict} & 1 bản ghi \\
+        \texttt{POST /predict/batch} & 1--100 bản ghi \\
+        \texttt{GET /samples} & mẫu test + nhãn thật \\
+        \texttt{GET /docs}, \texttt{/ui} & Swagger, giao diện \\
+        \bottomrule
+      \end{tabular}
+    \end{column}
+    \begin{column}{0.48\textwidth}
+      \small \textbf{422} khi: thiếu / thừa trường (kèm tên), chuỗi, \texttt{null}, NaN, $\infty$, $\le 0$, vượt
+      \UpperFactor{}× max tập train
+      \vspace{4pt}
+
+      \textbf{Log}: request id, đường dẫn, trạng thái, độ trễ, nhãn --- \alert{không bao giờ} ghi giá trị xét nghiệm
+    \end{column}
+  \end{columns}
+  \vspace{6pt}
+\begin{lstlisting}
+{"predicted_label": "malignant", "probability_malignant": 0.9971,
+ "threshold_malignant": 0.3993, "model_version": "1.0.0", "warning": "..."}
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}{Giao diện demo}
+  \centering
+  \includegraphics[width=0.86\textwidth]{ui_ac_tinh.png}
+
+  \small Lấy mẫu test ngẫu nhiên · form 30 trường (mean / error / worst) · thanh xác suất có vạch ngưỡng · so với nhãn thật
+\end{frame}
+
+% =============================================================================
+\section{Kiểm thử và triển khai}
+% =============================================================================
+
+\begin{frame}{Kiểm thử và CI}
+  \begin{columns}[T]
+    \begin{column}{0.5\textwidth}
+      \textbf{\texttt{tests/test\_api.py}} --- ma trận của bài giảng
+      \small
+      \begin{itemize}
+        \item Happy path, thiếu / thừa trường
+        \item Sai kiểu, NaN, $\pm\infty$, ngoài miền
+        \item Batch, samples, 503, request id
+        \item Giá trị gửi lên không lọt vào log
+      \end{itemize}
+    \end{column}
+    \begin{column}{0.48\textwidth}
+      \textbf{\texttt{tests/test\_model.py}} --- hồi quy mô hình
+      \small
+      \begin{itemize}
+        \item Mẫu cố định $\rightarrow$ nhãn, xác suất cố định
+        \item Chỉ số test $\ge$ mức tối thiểu
+      \end{itemize}
+      \normalsize\textbf{GitHub Actions}
+      \small
+      \begin{itemize}
+        \item ruff $\rightarrow$ pytest $\rightarrow$ \alert{train lại} $\rightarrow$ pytest $\rightarrow$ smoke test
+      \end{itemize}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}[fragile]{Triển khai trên Render}
+  \begin{columns}[T]
+    \begin{column}{0.5\textwidth}
+\begin{lstlisting}
+services:
+  - type: web
+    name: breast-cancer-svm-api
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.10
+\end{lstlisting}
+    \end{column}
+    \begin{column}{0.48\textwidth}
+      \small
+      \begin{enumerate}
+        \item Push GitHub (commit \texttt{artifacts/})
+        \item New $\rightarrow$ \textbf{Blueprint} $\rightarrow$ Apply
+        \item Health check \texttt{/health} xanh
+        \item \texttt{smoke\_test.py <URL>}: 7 bước của bài giảng
+      \end{enumerate}
+      Phục vụ \alert{đúng artifact đã commit} (không train lúc build); phiên bản thư viện khoá và được kiểm tra khi khởi động.
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Bảo mật, giám sát, giới hạn}
+  \begin{columns}[T]
+    \begin{column}{0.5\textwidth}
+      \textbf{Bảo mật và giám sát}
+      \small
+      \begin{itemize}
+        \item HTTPS; không dữ liệu định danh; log không có payload
+        \item Theo dõi lỗi HTTP, độ trễ, tỷ lệ nhãn, tần suất ngoài miền (trôi dữ liệu)
+        \item Khi có nhãn thật: đánh giá lại sensitivity, hiệu chỉnh
+      \end{itemize}
+    \end{column}
+    \begin{column}{0.48\textwidth}
+      \textbf{Giới hạn và hướng phát triển}
+      \small
+      \begin{itemize}
+        \item Một cơ sở, \NSamples{} ca; test chỉ \TestMalignant{} ca ác tính
+        \item Chưa kiểm định ngoại bộ; không chia được theo bệnh nhân
+        \item Tiếp theo: dữ liệu đa cơ sở, ngưỡng theo chi phí lâm sàng, giải thích dự đoán (SHAP)
+      \end{itemize}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+% =============================================================================
+\section{Demo và kết luận}
+% =============================================================================
+
+\begin{frame}{Demo trực tiếp}
+  \begin{columns}[T]
+    \begin{column}{0.55\textwidth}
+      \begin{enumerate}
+        \item Mở \texttt{/ui} $\rightarrow$ \textbf{Mẫu ác tính} $\rightarrow$ Dự đoán
+        \item \textbf{Mẫu lành tính} $\rightarrow$ Dự đoán
+        \item Xoá một ô $\rightarrow$ gửi qua Swagger $\rightarrow$ \alert{422}
+        \item \texttt{/docs}, \texttt{/health}, \texttt{/metadata}
+      \end{enumerate}
+      \vspace{8pt}
+      \small Dịch vụ Free ngủ sau \textasciitilde15 phút: mở trước 1--2 phút
+    \end{column}
+    \begin{column}{0.43\textwidth}
+      \begin{block}{Địa chỉ}
+        \centering\small
+        \texttt{https://breast-cancer-svm-api.onrender.com/ui}
+      \end{block}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Kết luận}
+  \begin{itemize}
+    \item Quy trình đầy đủ: dữ liệu $\rightarrow$ chia tập đúng cách $\rightarrow$ pipeline $\rightarrow$ đánh giá y khoa
+          $\rightarrow$ artifact có phiên bản $\rightarrow$ API $\rightarrow$ kiểm thử $\rightarrow$ Render
+    \item Test: sensitivity \TestSens, specificity \TestSpec, ROC-AUC \TestAUC{} tại ngưỡng \Threshold{} chọn trước
+    \item Bài học: ngưỡng và xác suất quan trọng không kém độ chính xác --- và phải chọn \alert{trước} khi nhìn tập test
+  \end{itemize}
+  \vfill
+  \canhbao
+\end{frame}
+
+\begin{frame}[plain]
+  \centering
+  \vfill
+  {\Large Cảm ơn quý vị đã lắng nghe}
+  \vspace{12pt}
+
+  \texttt{https://breast-cancer-svm-api.onrender.com}
+  \vfill
+\end{frame}
+
+\end{document}

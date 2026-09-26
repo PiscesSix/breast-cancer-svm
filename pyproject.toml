@@ -8,3 +8,7 @@ select = ["E", "F", "W", "I", "B", "UP"]
 
 [tool.ruff.lint.isort]
 known-first-party = ["app", "scripts", "conftest"]
+
+[tool.ruff.lint.per-file-ignores]
+# %-formatting keeps the LaTeX braces readable in the listings map.
+"docs/latex/make_listings_map.py" = ["UP031"]

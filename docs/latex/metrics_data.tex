@@ -1,0 +1,134 @@
+% Tệp sinh tự động bởi docs/latex/make_tex_data.py — KHÔNG sửa tay.
+% Nguồn: reports/metrics.json + artifacts/metadata.json (train lúc 2026-09-26T12:35:51+00:00)
+
+\newcommand{\GeneratedAt}{2026-09-26 12:35:51 U C}
+\newcommand{\ModelName}{\texttt{breast-cancer-svm-rbf}}
+\newcommand{\ModelVersion}{1.0.0}
+\newcommand{\SklearnVersion}{1.9.1}
+\newcommand{\NumpyVersion}{2.5.3}
+\newcommand{\PythonVersion}{3.12.10}
+\newcommand{\DataHashShort}{25e2eb7b7a87}
+\newcommand{\NSamples}{569}
+\newcommand{\NFeatures}{30}
+\newcommand{\NMalignant}{212}
+\newcommand{\NBenign}{357}
+\newcommand{\PctMalignant}{37.3\%}
+\newcommand{\PctBenign}{62.7\%}
+\newcommand{\NTrain}{455}
+\newcommand{\NTest}{114}
+\newcommand{\TestMalignant}{42}
+\newcommand{\TestBenign}{72}
+\newcommand{\NZeroRows}{13}
+\newcommand{\NZeroFeatures}{6}
+\newcommand{\ZeroFeatures}{\texttt{mean concavity}, \texttt{mean concave points}, \texttt{concavity error}, \texttt{concave points error}, \texttt{worst concavity}, \texttt{worst concave points}}
+\newcommand{\RandomState}{42}
+\newcommand{\UpperFactor}{3}
+\newcommand{\PcaOne}{44.3\%}
+\newcommand{\PcaTwo}{19.0\%}
+\newcommand{\PcaTotal}{63.2\%}
+\newcommand{\GridConfigs}{16}
+\newcommand{\GridSeconds}{2.8}
+\newcommand{\GridScoring}{\texttt{recall\_macro}}
+\newcommand{\BestC}{10}
+\newcommand{\BestGamma}{0.01}
+\newcommand{\GridCVMean}{0.9753}
+\newcommand{\GridCVStd}{0.0162}
+\newcommand{\CalibChosen}{\texttt{calibrated\_sigmoid\_single}}
+\newcommand{\CalibChosenBrier}{0.01903}
+\newcommand{\CalibBaselineBrier}{0.01873}
+\newcommand{\CalibSigmoidBrier}{0.02476}
+\newcommand{\CalibIsotonicBrier}{0.01956}
+\newcommand{\Threshold}{0.3993}
+\newcommand{\TargetSens}{0.97}
+\newcommand{\ImpliedCostRatio}{1.50}
+\newcommand{\TrainSens}{0.9824}
+\newcommand{\TrainSpec}{0.9895}
+\newcommand{\CVSens}{0.9706}
+\newcommand{\CVSpec}{0.9789}
+\newcommand{\CVTP}{165}
+\newcommand{\CVFN}{5}
+\newcommand{\CVFP}{6}
+\newcommand{\CVHalfSens}{0.9647}
+\newcommand{\CVHalfSpec}{0.9860}
+\newcommand{\CVHalfTP}{164}
+\newcommand{\CVHalfFN}{6}
+\newcommand{\CVHalfFP}{4}
+\newcommand{\CVMalignant}{170}
+\newcommand{\TestSens}{0.9762}
+\newcommand{\TestSpec}{0.9306}
+\newcommand{\TestPrec}{0.8913}
+\newcommand{\TestFOne}{0.9318}
+\newcommand{\TestNPV}{0.9853}
+\newcommand{\TestAcc}{0.9474}
+\newcommand{\TestAUC}{0.9967}
+\newcommand{\TestPRAUC}{0.9952}
+\newcommand{\TestBrier}{0.0235}
+\newcommand{\TestTP}{41}
+\newcommand{\TestFN}{1}
+\newcommand{\TestFP}{5}
+\newcommand{\TestTN}{67}
+\newcommand{\HalfSens}{0.9762}
+\newcommand{\HalfSpec}{0.9722}
+\newcommand{\HalfPrec}{0.9535}
+\newcommand{\HalfFN}{1}
+\newcommand{\HalfFP}{2}
+\newcommand{\TestNErrors}{6}
+\newcommand{\MissedProba}{0.0987}
+\newcommand{\FPMinProba}{0.4617}
+\newcommand{\FPMaxProba}{0.7249}
+\newcommand{\FPBelowHalf}{3}
+
+% Bảng so sánh cách hiệu chỉnh xác suất (4 cột)
+\newcommand{\CalibRows}{%
+  \texttt{svc\_probability} & 0.01873 & 0.07208 & 0.9958 & Platt trong libsvm, deprecated từ 1.9 \\
+  \textbf{\texttt{calibrated\_sigmoid\_single}} & 0.01903 & 0.07381 & 0.9955 & khuyến nghị thay \texttt{probability=True} \\
+  \texttt{calibrated\_sigmoid} & 0.02476 & 0.10639 & 0.9959 & trung bình 5 mô hình đã hiệu chỉnh \\
+  \texttt{calibrated\_isotonic} & 0.01956 & 0.13740 & 0.9937 & hồi quy đơn điệu, không tham số \\
+}
+
+% Bảng metric train / CV / test (10 cột)
+\newcommand{\MetricRows}{%
+  Train & 0.3993 & 0.9824 & 0.9895 & 0.9824 & 0.9824 & 0.9983 & 0.9978 & 3 & 3 \\
+  CV out-of-fold & 0.3993 & 0.9706 & 0.9789 & 0.9649 & 0.9677 & 0.9955 & 0.9946 & 5 & 6 \\
+  \textbf{Test} & 0.3993 & 0.9762 & 0.9306 & 0.8913 & 0.9318 & 0.9967 & 0.9952 & 1 & 5 \\
+  Test, ngưỡng 0.5 & 0.5000 & 0.9762 & 0.9722 & 0.9535 & 0.9647 & 0.9967 & 0.9952 & 1 & 2 \\
+}
+
+% Bảng metric rút gọn cho slide (6 cột)
+\newcommand{\MetricRowsShort}{%
+  Train & 0.9824 & 0.9895 & 0.9824 & 0.9983 & 3 \\
+  CV (OOF) & 0.9706 & 0.9789 & 0.9649 & 0.9955 & 5 \\
+  \textbf{Test} & 0.9762 & 0.9306 & 0.8913 & 0.9967 & 1 \\
+  Test @ 0.5 & 0.9762 & 0.9722 & 0.9535 & 0.9967 & 1 \\
+}
+
+% Các mẫu test bị dự đoán sai (4 cột)
+\newcommand{\ErrorRows}{%
+  3 & lành tính & ác tính & 0.4617 \\
+  16 & lành tính & ác tính & 0.7249 \\
+  38 & lành tính & ác tính & 0.4707 \\
+  51 & lành tính & ác tính & 0.4932 \\
+  53 & ác tính & lành tính & 0.0987 \\
+  66 & lành tính & ác tính & 0.5096 \\
+}
+
+% Kết quả GridSearchCV (4 cột)
+\newcommand{\GridRows}{%
+  10 & 0.01 & 0.9753 $\pm$ 0.0162 & 1 \\
+  10 & 0.001 & 0.9736 $\pm$ 0.0059 & 2 \\
+  1 & scale & 0.9730 $\pm$ 0.0107 & 3 \\
+  1 & 0.01 & 0.9724 $\pm$ 0.0080 & 4 \\
+  100 & 0.001 & 0.9724 $\pm$ 0.0080 & 4 \\
+  100 & scale & 0.9666 $\pm$ 0.0232 & 6 \\
+  10 & scale & 0.9654 $\pm$ 0.0089 & 7 \\
+  1 & 0.1 & 0.9578 $\pm$ 0.0132 & 8 \\
+  100 & 0.01 & 0.9577 $\pm$ 0.0133 & 9 \\
+  10 & 0.1 & 0.9461 $\pm$ 0.0249 & 10 \\
+  100 & 0.1 & 0.9461 $\pm$ 0.0249 & 10 \\
+  0.1 & scale & 0.9449 $\pm$ 0.0121 & 12 \\
+  1 & 0.001 & 0.9371 $\pm$ 0.0207 & 13 \\
+  0.1 & 0.01 & 0.9330 $\pm$ 0.0206 & 14 \\
+  0.1 & 0.1 & 0.9081 $\pm$ 0.0313 & 15 \\
+  0.1 & 0.001 & 0.8624 $\pm$ 0.0428 & 16 \\
+}
+
