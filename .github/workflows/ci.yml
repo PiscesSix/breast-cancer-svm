@@ -1,0 +1,35 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12.10"
+          cache: pip
+          cache-dependency-path: requirements-dev.txt
+      - name: Install dependencies
+        run: python -m pip install -r requirements-dev.txt
+      - name: Lint (ruff)
+        run: python -m ruff check .
+      - name: Tests on the committed artifact
+        run: python -m pytest
+      # Retrain from scratch and test again: proves the committed artifact is reproducible
+      # (same data hash, same fixed predictions, same metrics as metadata.json).
+      - name: Retrain
+        run: python scripts/train.py
+      - name: Tests on the retrained artifact
+        run: python -m pytest
+      - name: Figures and metrics
+        run: python scripts/evaluate.py
+      - name: Smoke test against a local server
+        run: |
+          python -m uvicorn app.main:app --host 127.0.0.1 --port 8000 &
+          sleep 5
+          python scripts/smoke_test.py http://127.0.0.1:8000

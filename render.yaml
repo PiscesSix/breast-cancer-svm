@@ -1,0 +1,16 @@
+# Render Blueprint: New > Blueprint > pick this repository.
+# The committed artifact is served as-is (no training at build time), so the numbers in the report,
+# the slides and the live API are the same model. PYTHON_VERSION and requirements.txt are pinned to
+# the environment that trained artifacts/breast_cancer_svm.joblib (checked again at startup).
+services:
+  - type: web
+    name: breast-cancer-svm-api
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.10
