@@ -1,0 +1,389 @@
+{
+  "generated_at": "2026-09-26T12:35:51+00:00",
+  "model": {
+    "model_name": "breast-cancer-svm-rbf",
+    "model_version": "1.0.0",
+    "best_params": {
+      "svc__C": 10,
+      "svc__gamma": 0.01
+    },
+    "calibration": "calibrated_sigmoid_single",
+    "threshold_malignant": 0.3993,
+    "target_sensitivity": 0.97,
+    "sklearn_version": "1.9.1"
+  },
+  "environment": {
+    "python": "3.12.10",
+    "scikit_learn": "1.9.1",
+    "numpy": "2.5.3"
+  },
+  "data": {
+    "n_samples": 569,
+    "n_features": 30,
+    "n_malignant": 212,
+    "n_benign": 357,
+    "n_train": 455,
+    "n_test": 114,
+    "test_malignant": 42,
+    "test_benign": 72,
+    "n_zero_rows": 13,
+    "zero_features": [
+      "mean concavity",
+      "mean concave points",
+      "concavity error",
+      "concave points error",
+      "worst concavity",
+      "worst concave points"
+    ]
+  },
+  "grid_search": {
+    "scoring": "recall_macro",
+    "n_configs": 16,
+    "seconds": 2.81,
+    "best_params": {
+      "svc__C": 10,
+      "svc__gamma": 0.01
+    },
+    "cv_mean": 0.9753,
+    "cv_std": 0.0162
+  },
+  "grid_results": [
+    {
+      "C": 0.1,
+      "gamma": "scale",
+      "mean": 0.9449,
+      "std": 0.0121,
+      "rank": 12
+    },
+    {
+      "C": 0.1,
+      "gamma": 0.001,
+      "mean": 0.8624,
+      "std": 0.0428,
+      "rank": 16
+    },
+    {
+      "C": 0.1,
+      "gamma": 0.01,
+      "mean": 0.933,
+      "std": 0.0206,
+      "rank": 14
+    },
+    {
+      "C": 0.1,
+      "gamma": 0.1,
+      "mean": 0.9081,
+      "std": 0.0313,
+      "rank": 15
+    },
+    {
+      "C": 1,
+      "gamma": "scale",
+      "mean": 0.973,
+      "std": 0.0107,
+      "rank": 3
+    },
+    {
+      "C": 1,
+      "gamma": 0.001,
+      "mean": 0.9371,
+      "std": 0.0207,
+      "rank": 13
+    },
+    {
+      "C": 1,
+      "gamma": 0.01,
+      "mean": 0.9724,
+      "std": 0.008,
+      "rank": 4
+    },
+    {
+      "C": 1,
+      "gamma": 0.1,
+      "mean": 0.9578,
+      "std": 0.0132,
+      "rank": 8
+    },
+    {
+      "C": 10,
+      "gamma": "scale",
+      "mean": 0.9654,
+      "std": 0.0089,
+      "rank": 7
+    },
+    {
+      "C": 10,
+      "gamma": 0.001,
+      "mean": 0.9736,
+      "std": 0.0059,
+      "rank": 2
+    },
+    {
+      "C": 10,
+      "gamma": 0.01,
+      "mean": 0.9753,
+      "std": 0.0162,
+      "rank": 1
+    },
+    {
+      "C": 10,
+      "gamma": 0.1,
+      "mean": 0.9461,
+      "std": 0.0249,
+      "rank": 10
+    },
+    {
+      "C": 100,
+      "gamma": "scale",
+      "mean": 0.9666,
+      "std": 0.0232,
+      "rank": 6
+    },
+    {
+      "C": 100,
+      "gamma": 0.001,
+      "mean": 0.9724,
+      "std": 0.008,
+      "rank": 4
+    },
+    {
+      "C": 100,
+      "gamma": 0.01,
+      "mean": 0.9577,
+      "std": 0.0133,
+      "rank": 9
+    },
+    {
+      "C": 100,
+      "gamma": 0.1,
+      "mean": 0.9461,
+      "std": 0.0249,
+      "rank": 10
+    }
+  ],
+  "calibration": {
+    "chosen": "calibrated_sigmoid_single",
+    "criterion": "Brier score thấp nhất trên xác suất out-of-fold của tập train, loại cách đã deprecated",
+    "candidates": [
+      {
+        "method": "svc_probability",
+        "label": "SVC(probability=True) — Platt nội bộ của libsvm (deprecated từ 1.9)",
+        "brier": 0.01873,
+        "log_loss": 0.07208,
+        "roc_auc": 0.99583,
+        "deprecated": true
+      },
+      {
+        "method": "calibrated_sigmoid_single",
+        "label": "CalibratedClassifierCV(method='sigmoid', ensemble=False)",
+        "brier": 0.01903,
+        "log_loss": 0.07381,
+        "roc_auc": 0.99552,
+        "deprecated": false
+      },
+      {
+        "method": "calibrated_sigmoid",
+        "label": "CalibratedClassifierCV(method='sigmoid')",
+        "brier": 0.02476,
+        "log_loss": 0.10639,
+        "roc_auc": 0.99585,
+        "deprecated": false
+      },
+      {
+        "method": "calibrated_isotonic",
+        "label": "CalibratedClassifierCV(method='isotonic')",
+        "brier": 0.01956,
+        "log_loss": 0.1374,
+        "roc_auc": 0.9937,
+        "deprecated": false
+      }
+    ]
+  },
+  "threshold": {
+    "value": 0.3993,
+    "target_sensitivity": 0.97,
+    "rule": "ngưỡng cao nhất trên P(ác tính) vẫn giữ sensitivity out-of-fold ≥ mục tiêu"
+  },
+  "metrics": {
+    "train": {
+      "threshold": 0.3993,
+      "n": 455,
+      "sensitivity": 0.9824,
+      "specificity": 0.9895,
+      "precision_malignant": 0.9824,
+      "npv": 0.9895,
+      "f1_malignant": 0.9824,
+      "accuracy": 0.9868,
+      "roc_auc": 0.9983,
+      "pr_auc": 0.9978,
+      "brier": 0.0095,
+      "confusion_matrix": [
+        [
+          167,
+          3
+        ],
+        [
+          3,
+          282
+        ]
+      ],
+      "false_negatives": 3,
+      "false_positives": 3
+    },
+    "cv_oof": {
+      "threshold": 0.3993,
+      "n": 455,
+      "sensitivity": 0.9706,
+      "specificity": 0.9789,
+      "precision_malignant": 0.9649,
+      "npv": 0.9824,
+      "f1_malignant": 0.9677,
+      "accuracy": 0.9758,
+      "roc_auc": 0.9955,
+      "pr_auc": 0.9946,
+      "brier": 0.019,
+      "confusion_matrix": [
+        [
+          165,
+          5
+        ],
+        [
+          6,
+          279
+        ]
+      ],
+      "false_negatives": 5,
+      "false_positives": 6
+    },
+    "cv_oof_at_0_5": {
+      "threshold": 0.5,
+      "n": 455,
+      "sensitivity": 0.9647,
+      "specificity": 0.986,
+      "precision_malignant": 0.9762,
+      "npv": 0.9791,
+      "f1_malignant": 0.9704,
+      "accuracy": 0.978,
+      "roc_auc": 0.9955,
+      "pr_auc": 0.9946,
+      "brier": 0.019,
+      "confusion_matrix": [
+        [
+          164,
+          6
+        ],
+        [
+          4,
+          281
+        ]
+      ],
+      "false_negatives": 6,
+      "false_positives": 4
+    },
+    "test": {
+      "threshold": 0.3993,
+      "n": 114,
+      "sensitivity": 0.9762,
+      "specificity": 0.9306,
+      "precision_malignant": 0.8913,
+      "npv": 0.9853,
+      "f1_malignant": 0.9318,
+      "accuracy": 0.9474,
+      "roc_auc": 0.9967,
+      "pr_auc": 0.9952,
+      "brier": 0.0235,
+      "confusion_matrix": [
+        [
+          41,
+          1
+        ],
+        [
+          5,
+          67
+        ]
+      ],
+      "false_negatives": 1,
+      "false_positives": 5
+    },
+    "test_at_0_5": {
+      "threshold": 0.5,
+      "n": 114,
+      "sensitivity": 0.9762,
+      "specificity": 0.9722,
+      "precision_malignant": 0.9535,
+      "npv": 0.9859,
+      "f1_malignant": 0.9647,
+      "accuracy": 0.9737,
+      "roc_auc": 0.9967,
+      "pr_auc": 0.9952,
+      "brier": 0.0235,
+      "confusion_matrix": [
+        [
+          41,
+          1
+        ],
+        [
+          2,
+          70
+        ]
+      ],
+      "false_negatives": 1,
+      "false_positives": 2
+    }
+  },
+  "test_errors": [
+    {
+      "index": 3,
+      "true": "benign",
+      "predicted": "malignant",
+      "proba_malignant": 0.4617
+    },
+    {
+      "index": 16,
+      "true": "benign",
+      "predicted": "malignant",
+      "proba_malignant": 0.7249
+    },
+    {
+      "index": 38,
+      "true": "benign",
+      "predicted": "malignant",
+      "proba_malignant": 0.4707
+    },
+    {
+      "index": 51,
+      "true": "benign",
+      "predicted": "malignant",
+      "proba_malignant": 0.4932
+    },
+    {
+      "index": 53,
+      "true": "malignant",
+      "predicted": "benign",
+      "proba_malignant": 0.0987
+    },
+    {
+      "index": 66,
+      "true": "benign",
+      "predicted": "malignant",
+      "proba_malignant": 0.5096
+    }
+  ],
+  "pca_explained_variance": [
+    0.4427,
+    0.1897
+  ],
+  "figures": [
+    "01_phan_bo_nhan.png",
+    "02_phan_phoi_dac_trung.png",
+    "03_tuong_quan.png",
+    "04_pca.png",
+    "05_grid_search.png",
+    "06_hieu_chinh_xac_suat.png",
+    "07_chon_nguong.png",
+    "08_ma_tran_nham_lan.png",
+    "09_roc_pr.png",
+    "10_hieu_chinh.png",
+    "11_phan_phoi_xac_suat.png"
+  ]
+}
