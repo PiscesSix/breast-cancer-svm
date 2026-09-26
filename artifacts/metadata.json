@@ -1,0 +1,283 @@
+{
+  "model_name": "breast-cancer-svm-rbf",
+  "model_version": "1.0.0",
+  "feature_names": [
+    "mean radius",
+    "mean texture",
+    "mean perimeter",
+    "mean area",
+    "mean smoothness",
+    "mean compactness",
+    "mean concavity",
+    "mean concave points",
+    "mean symmetry",
+    "mean fractal dimension",
+    "radius error",
+    "texture error",
+    "perimeter error",
+    "area error",
+    "smoothness error",
+    "compactness error",
+    "concavity error",
+    "concave points error",
+    "symmetry error",
+    "fractal dimension error",
+    "worst radius",
+    "worst texture",
+    "worst perimeter",
+    "worst area",
+    "worst smoothness",
+    "worst compactness",
+    "worst concavity",
+    "worst concave points",
+    "worst symmetry",
+    "worst fractal dimension"
+  ],
+  "features": [
+    {
+      "name": "mean radius",
+      "allow_zero": false,
+      "train_min": 6.981,
+      "train_max": 28.11,
+      "upper_bound": 84.33
+    },
+    {
+      "name": "mean texture",
+      "allow_zero": false,
+      "train_min": 9.71,
+      "train_max": 39.28,
+      "upper_bound": 117.84
+    },
+    {
+      "name": "mean perimeter",
+      "allow_zero": false,
+      "train_min": 43.79,
+      "train_max": 188.5,
+      "upper_bound": 565.5
+    },
+    {
+      "name": "mean area",
+      "allow_zero": false,
+      "train_min": 143.5,
+      "train_max": 2499.0,
+      "upper_bound": 7497.0
+    },
+    {
+      "name": "mean smoothness",
+      "allow_zero": false,
+      "train_min": 0.06251,
+      "train_max": 0.1447,
+      "upper_bound": 0.4341
+    },
+    {
+      "name": "mean compactness",
+      "allow_zero": false,
+      "train_min": 0.01938,
+      "train_max": 0.3454,
+      "upper_bound": 1.0362
+    },
+    {
+      "name": "mean concavity",
+      "allow_zero": true,
+      "train_min": 0.0,
+      "train_max": 0.4268,
+      "upper_bound": 1.2804
+    },
+    {
+      "name": "mean concave points",
+      "allow_zero": true,
+      "train_min": 0.0,
+      "train_max": 0.2012,
+      "upper_bound": 0.6036
+    },
+    {
+      "name": "mean symmetry",
+      "allow_zero": false,
+      "train_min": 0.106,
+      "train_max": 0.304,
+      "upper_bound": 0.912
+    },
+    {
+      "name": "mean fractal dimension",
+      "allow_zero": false,
+      "train_min": 0.04996,
+      "train_max": 0.09744,
+      "upper_bound": 0.29232
+    },
+    {
+      "name": "radius error",
+      "allow_zero": false,
+      "train_min": 0.1115,
+      "train_max": 2.873,
+      "upper_bound": 8.619
+    },
+    {
+      "name": "texture error",
+      "allow_zero": false,
+      "train_min": 0.3602,
+      "train_max": 4.885,
+      "upper_bound": 14.655
+    },
+    {
+      "name": "perimeter error",
+      "allow_zero": false,
+      "train_min": 0.757,
+      "train_max": 21.98,
+      "upper_bound": 65.94
+    },
+    {
+      "name": "area error",
+      "allow_zero": false,
+      "train_min": 6.802,
+      "train_max": 525.6,
+      "upper_bound": 1576.8
+    },
+    {
+      "name": "smoothness error",
+      "allow_zero": false,
+      "train_min": 0.001713,
+      "train_max": 0.03113,
+      "upper_bound": 0.09339
+    },
+    {
+      "name": "compactness error",
+      "allow_zero": false,
+      "train_min": 0.002252,
+      "train_max": 0.1354,
+      "upper_bound": 0.4062
+    },
+    {
+      "name": "concavity error",
+      "allow_zero": true,
+      "train_min": 0.0,
+      "train_max": 0.396,
+      "upper_bound": 1.188
+    },
+    {
+      "name": "concave points error",
+      "allow_zero": true,
+      "train_min": 0.0,
+      "train_max": 0.05279,
+      "upper_bound": 0.15837
+    },
+    {
+      "name": "symmetry error",
+      "allow_zero": false,
+      "train_min": 0.007882,
+      "train_max": 0.07895,
+      "upper_bound": 0.23685
+    },
+    {
+      "name": "fractal dimension error",
+      "allow_zero": false,
+      "train_min": 0.000895,
+      "train_max": 0.02984,
+      "upper_bound": 0.08952
+    },
+    {
+      "name": "worst radius",
+      "allow_zero": false,
+      "train_min": 7.93,
+      "train_max": 33.13,
+      "upper_bound": 99.39
+    },
+    {
+      "name": "worst texture",
+      "allow_zero": false,
+      "train_min": 12.02,
+      "train_max": 49.54,
+      "upper_bound": 148.62
+    },
+    {
+      "name": "worst perimeter",
+      "allow_zero": false,
+      "train_min": 50.41,
+      "train_max": 229.3,
+      "upper_bound": 687.9
+    },
+    {
+      "name": "worst area",
+      "allow_zero": false,
+      "train_min": 185.2,
+      "train_max": 3432.0,
+      "upper_bound": 10296.0
+    },
+    {
+      "name": "worst smoothness",
+      "allow_zero": false,
+      "train_min": 0.07117,
+      "train_max": 0.2184,
+      "upper_bound": 0.6552
+    },
+    {
+      "name": "worst compactness",
+      "allow_zero": false,
+      "train_min": 0.02729,
+      "train_max": 1.058,
+      "upper_bound": 3.174
+    },
+    {
+      "name": "worst concavity",
+      "allow_zero": true,
+      "train_min": 0.0,
+      "train_max": 1.252,
+      "upper_bound": 3.756
+    },
+    {
+      "name": "worst concave points",
+      "allow_zero": true,
+      "train_min": 0.0,
+      "train_max": 0.291,
+      "upper_bound": 0.873
+    },
+    {
+      "name": "worst symmetry",
+      "allow_zero": false,
+      "train_min": 0.1565,
+      "train_max": 0.6638,
+      "upper_bound": 1.9914
+    },
+    {
+      "name": "worst fractal dimension",
+      "allow_zero": false,
+      "train_min": 0.05504,
+      "train_max": 0.2075,
+      "upper_bound": 0.6225
+    }
+  ],
+  "class_mapping": {
+    "0": "malignant",
+    "1": "benign"
+  },
+  "positive_class": "malignant",
+  "threshold_malignant": 0.3993,
+  "target_sensitivity": 0.97,
+  "decision_rule": "malignant if P(malignant) >= threshold_malignant, otherwise benign",
+  "calibration": "calibrated_sigmoid_single",
+  "best_params": {
+    "svc__C": 10,
+    "svc__gamma": 0.01
+  },
+  "cv_recall_macro": {
+    "mean": 0.9753,
+    "std": 0.0162
+  },
+  "test_metrics": {
+    "sensitivity": 0.9762,
+    "specificity": 0.9306,
+    "precision_malignant": 0.8913,
+    "f1_malignant": 0.9318,
+    "roc_auc": 0.9967,
+    "pr_auc": 0.9952,
+    "accuracy": 0.9474
+  },
+  "n_train": 455,
+  "n_test": 114,
+  "train_date": "2026-09-26T12:35:51+00:00",
+  "data_hash": "25e2eb7b7a8745b1bde5ba18bc4969983d2e2f403291ecd5bde4a29ef30c3859",
+  "sklearn_version": "1.9.1",
+  "numpy_version": "2.5.3",
+  "python_version": "3.12.10",
+  "random_state": 42,
+  "warning": "Chỉ phục vụ mục đích giáo dục, không thay thế chẩn đoán y khoa. Educational use only; not a medical diagnosis."
+}
