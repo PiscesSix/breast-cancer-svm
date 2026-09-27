@@ -21,3 +21,7 @@ docs/latex/*.synctex.gz
 docs/latex/overleaf/
 
 # DO NOT ignore artifacts/: Render serves the committed model.
+
+# Local SQLite database of the database API (recreated by seed.py)
+data/*.db
+data/*.db-journal
