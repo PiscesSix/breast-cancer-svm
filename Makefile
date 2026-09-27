@@ -1,7 +1,7 @@
 PY ?= python
 URL ?= http://127.0.0.1:8000
 
-.PHONY: install train evaluate test lint run smoke sample tex slides all
+.PHONY: install train compare evaluate sample seed test lint run smoke tex slides all
 
 install:
 	$(PY) -m pip install -r requirements-dev.txt
@@ -9,11 +9,17 @@ install:
 train:
 	$(PY) scripts/train.py
 
+compare:
+	$(PY) scripts/train_comparison.py
+
 evaluate:
 	$(PY) scripts/evaluate.py
 
 sample:
 	$(PY) scripts/make_sample_request.py
+
+seed:
+	$(PY) seed.py
 
 test:
 	$(PY) -m pytest
@@ -21,8 +27,9 @@ test:
 lint:
 	$(PY) -m ruff check .
 
+# One process, like Render: dashboard at http://127.0.0.1:8000/
 run:
-	$(PY) -m uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
+	SERVICE_MODE=single $(PY) -m uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
 
 smoke:
 	$(PY) scripts/smoke_test.py $(URL)
@@ -34,4 +41,4 @@ tex:
 
 slides: tex
 
-all: train evaluate sample test lint tex
+all: train compare evaluate sample test lint tex
