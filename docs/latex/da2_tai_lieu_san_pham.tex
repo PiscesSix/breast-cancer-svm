@@ -150,7 +150,7 @@
 \textbf{Ngưỡng}   & ác tính khi $P(\text{ác tính}) \geq \Threshold$ (sensitivity mục tiêu $\geq \TargetSens$) \\
 \textbf{Tập test} & sensitivity \TestSens, specificity \TestSpec, ROC-AUC \TestAUC \\
 \textbf{Công nghệ}& Python \PythonVersion, scikit-learn \SklearnVersion, FastAPI, Uvicorn, Render \\
-\textbf{Địa chỉ}  & \url{https://breast-cancer-svm-api.onrender.com} \\
+\textbf{Địa chỉ}  & \url{https://breast-cancer-svm-api-f2qq.onrender.com} \\
 \textbf{Số liệu}  & sinh tự động từ lần huấn luyện \GeneratedAt \\
 \bottomrule
 \end{tabular}
@@ -779,7 +779,7 @@ API trực tuyến vì vậy là của cùng một mô hình. Phiên bản thư 
         \texttt{render.yaml} và hiển thị trước dịch vụ sẽ tạo.
   \item Chọn \textbf{Apply}, theo dõi build log (\texttt{pip install -r requirements.txt}) và runtime log cho tới khi
         health check \texttt{/health} thành công.
-  \item Truy cập \url{https://breast-cancer-svm-api.onrender.com}, kiểm tra \texttt{/health}, \texttt{/docs},
+  \item Truy cập \url{https://breast-cancer-svm-api-f2qq.onrender.com}, kiểm tra \texttt{/health}, \texttt{/docs},
         \texttt{/metadata}, \texttt{/predict}.
   \item Chạy \texttt{python scripts/smoke\_test.py <URL>}.
 \end{enumerate}
@@ -827,7 +827,7 @@ theo nhóm; duy trì phiên bản mô hình, khả năng rollback và quy trình
 % =============================================================================
 
 \subsection{Giao diện web}
-Mở \url{https://breast-cancer-svm-api.onrender.com/ui} (hoặc địa chỉ gốc bằng trình duyệt). Giao diện gồm băng cảnh
+Mở \url{https://breast-cancer-svm-api-f2qq.onrender.com/ui} (hoặc địa chỉ gốc bằng trình duyệt). Giao diện gồm băng cảnh
 báo giáo dục luôn hiển thị, hai nút lấy mẫu ngẫu nhiên từ tập kiểm tra (ác tính / lành tính), form 30 trường chia ba
 nhóm \emph{trung bình}, \emph{sai số chuẩn}, \emph{xấu nhất}, và thẻ kết quả: nhãn dự đoán, thanh xác suất có vạch
 ngưỡng, quy tắc ``$P(\text{ác tính})$ so với ngưỡng'', so sánh với nhãn thật nếu dùng mẫu test. Thẻ ``Mô hình đang
@@ -859,7 +859,7 @@ thật của tập kiểm tra) và quan sát mã trạng thái.
 \subsection{Gọi API bằng curl}
 \begin{lstlisting}[language=bash,numbers=none,caption={Dự đoán bằng curl với payload sinh từ dataset}]
 python scripts/make_sample_request.py
-curl -X POST "https://breast-cancer-svm-api.onrender.com/predict" \
+curl -X POST "https://breast-cancer-svm-api-f2qq.onrender.com/predict" \
   -H "Content-Type: application/json" \
   -d @sample_request.json
 \end{lstlisting}
@@ -868,7 +868,7 @@ curl -X POST "https://breast-cancer-svm-api.onrender.com/predict" \
 \begin{lstlisting}[caption={Lấy mẫu test rồi dự đoán bằng requests}]
 import requests
 
-BASE = "https://breast-cancer-svm-api.onrender.com"
+BASE = "https://breast-cancer-svm-api-f2qq.onrender.com"
 sample = requests.get(f"{BASE}/samples", params={"n": 1, "label": "malignant"}).json()["items"][0]
 r = requests.post(f"{BASE}/predict", json={"features": sample["features"]}, timeout=60)
 print(sample["label"], r.status_code, r.json()["predicted_label"], r.json()["probability_malignant"])
@@ -876,7 +876,7 @@ print(sample["label"], r.status_code, r.json()["predicted_label"], r.json()["pro
 
 \subsection{Gọi API bằng JavaScript}
 \begin{lstlisting}[language=java,numbers=none,caption={fetch trong trình duyệt}]
-const base = "https://breast-cancer-svm-api.onrender.com";
+const base = "https://breast-cancer-svm-api-f2qq.onrender.com";
 const { items } = await (await fetch(`${base}/samples?n=1&label=benign`)).json();
 const res = await fetch(`${base}/predict`, {
   method: "POST",

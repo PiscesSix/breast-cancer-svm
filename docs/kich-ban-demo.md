@@ -1,16 +1,16 @@
 # Kịch bản demo 5 phút — da2: SVM chẩn đoán ung thư vú
 
-**Địa chỉ dịch vụ:** https://breast-cancer-svm-api.onrender.com
-**Giao diện demo:** https://breast-cancer-svm-api.onrender.com/ui
+**Địa chỉ dịch vụ:** https://breast-cancer-svm-api-f2qq.onrender.com
+**Giao diện demo:** https://breast-cancer-svm-api-f2qq.onrender.com/ui
 
 > Luôn nói rõ ngay từ đầu: *"Sản phẩm chỉ phục vụ mục đích giáo dục, không thay thế chẩn đoán y khoa."*
 
 ## Chuẩn bị (trước giờ trình bày 2–3 phút)
 
 1. Gói Render Free ngủ sau khoảng 15 phút không dùng; request đầu tiên mất 30–60 giây. Mở sẵn
-   `https://breast-cancer-svm-api.onrender.com/health` cho tới khi thấy `"status": "ok"`.
+   `https://breast-cancer-svm-api-f2qq.onrender.com/health` cho tới khi thấy `"status": "ok"`.
 2. Mở sẵn bốn tab: `/ui`, `/docs`, `/health`, `/metadata`.
-3. (Tuỳ chọn) chạy `python scripts/smoke_test.py https://breast-cancer-svm-api.onrender.com` — 7/7 đạt là yên tâm.
+3. (Tuỳ chọn) chạy `python scripts/smoke_test.py https://breast-cancer-svm-api-f2qq.onrender.com` — 7/7 đạt là yên tâm.
 
 ## Phút 0:00 – 0:40 — Mở đầu
 
@@ -58,8 +58,8 @@
 
 ## Liên kết nhanh cho trình chiếu
 
-- Lấy mẫu ác tính và dự đoán ngay: `https://breast-cancer-svm-api.onrender.com/ui?sample=malignant&auto=1`
-- Lấy mẫu lành tính và dự đoán ngay: `https://breast-cancer-svm-api.onrender.com/ui?sample=benign&auto=1`
+- Lấy mẫu ác tính và dự đoán ngay: `https://breast-cancer-svm-api-f2qq.onrender.com/ui?sample=malignant&auto=1`
+- Lấy mẫu lành tính và dự đoán ngay: `https://breast-cancer-svm-api-f2qq.onrender.com/ui?sample=benign&auto=1`
 
 ## Tình huống dự phòng
 

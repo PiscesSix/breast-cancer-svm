@@ -7,7 +7,8 @@ Mô hình SVM (kernel RBF) phân loại khối u vú **lành tính / ác tính**
 *Breast Cancer Wisconsin Diagnostic* (`sklearn.datasets.load_breast_cancer`), phục vụ qua REST API FastAPI kèm giao
 diện web demo, triển khai trên Render.
 
-- **Demo trực tuyến:** `https://<ten-dich-vu>.onrender.com` _(cập nhật sau khi tạo dịch vụ trên Render)_
+- **Demo trực tuyến:** https://breast-cancer-svm-api-f2qq.onrender.com/ui (Render Free: lần mở đầu sau khi dịch vụ ngủ
+  có thể mất 30–60 giây)
 - **Swagger:** `/docs` · **Giao diện demo:** `/ui` (hoặc mở `/` bằng trình duyệt)
 
 ## Điểm chính
@@ -93,8 +94,8 @@ breast-cancer-svm/
 
 1. Đẩy repo lên GitHub (artifact trong `artifacts/` **phải** được commit).
 2. Render → **New → Blueprint** → chọn repo → Apply (đọc `render.yaml`).
-3. Chờ build xong và health check `/health` chuyển xanh; mở `https://<ten-dich-vu>.onrender.com/ui`.
-4. Chạy `python scripts/smoke_test.py https://<ten-dich-vu>.onrender.com` — 7 bước kiểm tra của bài giảng.
+3. Chờ build xong và health check `/health` chuyển xanh; mở `https://breast-cancer-svm-api-f2qq.onrender.com/ui`.
+4. Chạy `python scripts/smoke_test.py https://breast-cancer-svm-api-f2qq.onrender.com` — 7 bước kiểm tra của bài giảng.
 
 Gói Free ngủ sau khoảng 15 phút không dùng; request đầu tiên mất 30–60 giây. Dịch vụ phục vụ đúng artifact đã commit
 (không train lại lúc build), và kiểm tra lúc khởi động rằng phiên bản scikit-learn trùng với lúc huấn luyện.
