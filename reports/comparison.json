@@ -1,0 +1,386 @@
+{
+  "trained_at": "2026-09-27T06:34:11+00:00",
+  "task": {
+    "type": "classification",
+    "positive_class": "malignant",
+    "selection": "CV recall_macro"
+  },
+  "data": {
+    "n_samples": 569,
+    "train_size": 455,
+    "test_size": 114,
+    "cv": "StratifiedKFold(n_splits=5, shuffle=True, random_state=42)"
+  },
+  "target_sensitivity": 0.97,
+  "speed_thresholds": {
+    "fast": 1.5,
+    "medium": 3.0
+  },
+  "best_model": "logreg",
+  "models": [
+    {
+      "model": "svm_rbf",
+      "label": "SVM (RBF)",
+      "best_params": {
+        "C": 10,
+        "gamma": 0.01
+      },
+      "cv_mean": 0.9753,
+      "cv_std": 0.0162,
+      "n_configs": 16,
+      "threshold": 0.3993,
+      "sensitivity": 0.9762,
+      "specificity": 0.9306,
+      "precision_malignant": 0.8913,
+      "f1_malignant": 0.9318,
+      "roc_auc": 0.9967,
+      "pr_auc": 0.9952,
+      "brier": 0.0235,
+      "accuracy": 0.9474,
+      "false_negatives": 1,
+      "false_positives": 5,
+      "confusion_matrix": [
+        [
+          41,
+          1
+        ],
+        [
+          5,
+          67
+        ]
+      ],
+      "train_seconds": 0.0459,
+      "predict_ms_per_sample": 0.02174,
+      "roc": {
+        "fpr": [
+          0.0,
+          0.0,
+          0.0,
+          0.0139,
+          0.0139,
+          0.125,
+          0.125,
+          1.0
+        ],
+        "tpr": [
+          0.0,
+          0.0238,
+          0.9524,
+          0.9524,
+          0.9762,
+          0.9762,
+          1.0,
+          1.0
+        ]
+      },
+      "train_speed": {
+        "tier": "slow",
+        "label": "Chậm",
+        "ratio_to_fastest": 24.16
+      },
+      "predict_speed": {
+        "tier": "slow",
+        "label": "Chậm",
+        "ratio_to_fastest": 5.08
+      }
+    },
+    {
+      "model": "svm_linear",
+      "label": "SVM tuyến tính",
+      "best_params": {
+        "C": 0.01
+      },
+      "cv_mean": 0.9724,
+      "cv_std": 0.0108,
+      "n_configs": 4,
+      "threshold": 0.392,
+      "sensitivity": 0.9762,
+      "specificity": 0.9444,
+      "precision_malignant": 0.9111,
+      "f1_malignant": 0.9425,
+      "roc_auc": 0.996,
+      "pr_auc": 0.9941,
+      "brier": 0.0283,
+      "accuracy": 0.9561,
+      "false_negatives": 1,
+      "false_positives": 4,
+      "confusion_matrix": [
+        [
+          41,
+          1
+        ],
+        [
+          4,
+          68
+        ]
+      ],
+      "train_seconds": 0.0478,
+      "predict_ms_per_sample": 0.01898,
+      "roc": {
+        "fpr": [
+          0.0,
+          0.0,
+          0.0,
+          0.0139,
+          0.0139,
+          0.125,
+          0.125,
+          1.0
+        ],
+        "tpr": [
+          0.0,
+          0.0238,
+          0.9048,
+          0.9048,
+          0.9762,
+          0.9762,
+          1.0,
+          1.0
+        ]
+      },
+      "train_speed": {
+        "tier": "slow",
+        "label": "Chậm",
+        "ratio_to_fastest": 25.16
+      },
+      "predict_speed": {
+        "tier": "slow",
+        "label": "Chậm",
+        "ratio_to_fastest": 4.43
+      }
+    },
+    {
+      "model": "logreg",
+      "label": "Logistic Regression",
+      "best_params": {
+        "C": 1
+      },
+      "cv_mean": 0.976,
+      "cv_std": 0.0116,
+      "n_configs": 5,
+      "threshold": 0.5783,
+      "sensitivity": 0.9762,
+      "specificity": 0.9861,
+      "precision_malignant": 0.9762,
+      "f1_malignant": 0.9762,
+      "roc_auc": 0.9954,
+      "pr_auc": 0.994,
+      "brier": 0.026,
+      "accuracy": 0.9825,
+      "false_negatives": 1,
+      "false_positives": 1,
+      "confusion_matrix": [
+        [
+          41,
+          1
+        ],
+        [
+          1,
+          71
+        ]
+      ],
+      "train_seconds": 0.0097,
+      "predict_ms_per_sample": 0.00428,
+      "roc": {
+        "fpr": [
+          0.0,
+          0.0,
+          0.0,
+          0.1944,
+          0.1944,
+          1.0
+        ],
+        "tpr": [
+          0.0,
+          0.0238,
+          0.9762,
+          0.9762,
+          1.0,
+          1.0
+        ]
+      },
+      "train_speed": {
+        "tier": "slow",
+        "label": "Chậm",
+        "ratio_to_fastest": 5.11
+      },
+      "predict_speed": {
+        "tier": "fast",
+        "label": "Nhanh",
+        "ratio_to_fastest": 1.0
+      }
+    },
+    {
+      "model": "knn",
+      "label": "K láng giềng gần (KNN)",
+      "best_params": {
+        "n_neighbors": 9,
+        "weights": "uniform"
+      },
+      "cv_mean": 0.9577,
+      "cv_std": 0.017,
+      "n_configs": 12,
+      "threshold": 0.3333,
+      "sensitivity": 0.9762,
+      "specificity": 0.8889,
+      "precision_malignant": 0.8367,
+      "f1_malignant": 0.9011,
+      "roc_auc": 0.9944,
+      "pr_auc": 0.9892,
+      "brier": 0.0273,
+      "accuracy": 0.9211,
+      "false_negatives": 1,
+      "false_positives": 8,
+      "confusion_matrix": [
+        [
+          41,
+          1
+        ],
+        [
+          8,
+          64
+        ]
+      ],
+      "train_seconds": 0.0019,
+      "predict_ms_per_sample": 0.05355,
+      "roc": {
+        "fpr": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0417,
+          0.1111,
+          0.1667,
+          0.3611,
+          1.0
+        ],
+        "tpr": [
+          0.0,
+          0.8095,
+          0.9048,
+          0.9286,
+          0.9524,
+          0.9762,
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "train_speed": {
+        "tier": "fast",
+        "label": "Nhanh",
+        "ratio_to_fastest": 1.0
+      },
+      "predict_speed": {
+        "tier": "slow",
+        "label": "Chậm",
+        "ratio_to_fastest": 12.51
+      }
+    },
+    {
+      "model": "random_forest",
+      "label": "Random Forest",
+      "best_params": {
+        "max_depth": null,
+        "n_estimators": 100
+      },
+      "cv_mean": 0.9613,
+      "cv_std": 0.0114,
+      "n_configs": 6,
+      "threshold": 0.49,
+      "sensitivity": 0.9524,
+      "specificity": 0.9444,
+      "precision_malignant": 0.9091,
+      "f1_malignant": 0.9302,
+      "roc_auc": 0.9945,
+      "pr_auc": 0.9913,
+      "brier": 0.0329,
+      "accuracy": 0.9474,
+      "false_negatives": 2,
+      "false_positives": 4,
+      "confusion_matrix": [
+        [
+          40,
+          2
+        ],
+        [
+          4,
+          68
+        ]
+      ],
+      "train_seconds": 0.1535,
+      "predict_ms_per_sample": 0.08236,
+      "roc": {
+        "fpr": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0139,
+          0.0139,
+          0.0417,
+          0.0417,
+          0.0694,
+          0.0833,
+          0.0972,
+          0.0972,
+          0.1528,
+          0.1806,
+          0.2222,
+          0.25,
+          0.2778,
+          0.3194,
+          0.3472,
+          0.4583,
+          0.5139,
+          0.6528,
+          1.0
+        ],
+        "tpr": [
+          0.0,
+          0.5714,
+          0.6429,
+          0.6905,
+          0.7619,
+          0.8095,
+          0.9048,
+          0.9048,
+          0.9286,
+          0.9286,
+          0.9524,
+          0.9524,
+          0.9762,
+          0.9762,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "train_speed": {
+        "tier": "slow",
+        "label": "Chậm",
+        "ratio_to_fastest": 80.79
+      },
+      "predict_speed": {
+        "tier": "slow",
+        "label": "Chậm",
+        "ratio_to_fastest": 19.24
+      }
+    }
+  ],
+  "total_seconds": 17.13,
+  "trained_by": "scripts/train_comparison.py"
+}
