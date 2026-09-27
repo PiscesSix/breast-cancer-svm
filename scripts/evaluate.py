@@ -330,10 +330,41 @@ def main() -> None:
     for doc in MARKDOWN_WITH_METRICS:
         if update_markdown(doc, metrics_table(out)):
             print(f"[evaluate] đã cập nhật bảng số liệu trong {doc.relative_to(ROOT)}")
+    if COMPARISON_PATH.exists() and update_markdown(
+            ROOT / "README.md", comparison_table(json.loads(COMPARISON_PATH.read_text(encoding="utf-8"))),
+            COMPARISON_MARKERS):
+        print("[evaluate] đã cập nhật bảng so sánh 5 mô hình trong README.md")
 
 
 MARKDOWN_WITH_METRICS = [ROOT / "README.md", ROOT / "docs" / "model-card.md"]
 START, END = "<!-- metrics:start -->", "<!-- metrics:end -->"
+COMPARISON_PATH = REPORT_DIR / "comparison.json"
+COMPARISON_MARKERS = ("<!-- comparison:start -->", "<!-- comparison:end -->")
+
+
+def comparison_table(report: dict) -> str:
+    """Markdown table of the five-classifier comparison (reports/comparison.json)."""
+
+    def f(v: float) -> str:
+        return f"{v:.4f}".replace(".", ",")
+
+    rows = sorted(report["models"], key=lambda m: (-m["cv_mean"], -m["roc_auc"]))
+    lines = [
+        f"_Sinh tự động từ `reports/comparison.json` (train lúc {report['trained_at']}). Ngưỡng mỗi mô hình chọn cho "
+        f"sensitivity out-of-fold ≥ {f(report['target_sensitivity'])[:4]}; xếp theo CV recall_macro._",
+        "",
+        "| Mô hình | CV recall_macro | Sensitivity | Specificity | ROC-AUC | Ngưỡng | FN / FP "
+        "| Train (ms) | Predict (µs/mẫu) |",
+        "|---|---|---|---|---|---|---|---|---|",
+    ]
+    for m in rows:
+        name = f"**{m['label']}**" if m["model"] == report["best_model"] else m["label"]
+        train_ms = f"{m['train_seconds'] * 1000:.1f}".replace(".", ",")
+        predict_us = f"{m['predict_ms_per_sample'] * 1000:.1f}".replace(".", ",")
+        lines.append(f"| {name} | {f(m['cv_mean'])} ± {f(m['cv_std'])} | {f(m['sensitivity'])} | "
+                     f"{f(m['specificity'])} | {f(m['roc_auc'])} | {f(m['threshold'])} | "
+                     f"{m['false_negatives']} / {m['false_positives']} | {train_ms} | {predict_us} |")
+    return "\n".join(lines)
 
 
 def metrics_table(out: dict) -> str:
@@ -360,15 +391,16 @@ def metrics_table(out: dict) -> str:
     return "\n".join(lines)
 
 
-def update_markdown(path: Path, table: str) -> bool:
+def update_markdown(path: Path, table: str, markers: tuple[str, str] = (START, END)) -> bool:
+    start, end = markers
     if not path.exists():
         return False
     text = path.read_text(encoding="utf-8")
-    if START not in text or END not in text:
+    if start not in text or end not in text:
         return False
-    head, rest = text.split(START, 1)
-    _, tail = rest.split(END, 1)
-    path.write_text(f"{head}{START}\n{table}\n{END}{tail}", encoding="utf-8")
+    head, rest = text.split(start, 1)
+    _, tail = rest.split(end, 1)
+    path.write_text(f"{head}{start}\n{table}\n{end}{tail}", encoding="utf-8")
     return True
 
 
