@@ -1,12 +1,18 @@
 """Breast cancer SVM API — educational demonstration only.
 
+This is the model module (SVM diagnosis + five-classifier comparison). With SERVICE_MODE=single
+(the default, used on Render) it also mounts the database API under /db and serves the web module
+at /, so one process runs all three modules. `tasks.ps1 run-split` starts them on three ports.
+
 Run locally:  uvicorn app.main:app --reload
-Swagger UI:   http://127.0.0.1:8000/docs      Demo UI: http://127.0.0.1:8000/ui
+Swagger UI:   http://127.0.0.1:8000/docs      Dashboard: http://127.0.0.1:8000/
 """
 
 from __future__ import annotations
 
+import json
 import logging
+import mimetypes
 import time
 import uuid
 from contextlib import asynccontextmanager
@@ -16,9 +22,11 @@ from typing import Literal
 from fastapi import FastAPI, HTTPException, Query, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import FileResponse, JSONResponse, RedirectResponse, Response
 from fastapi.staticfiles import StaticFiles
 
+import settings
+from app import dashboard_api
 from app.model_service import OutOfRange, service
 from app.schemas import (
     FEATURE_ALIASES,
@@ -30,6 +38,11 @@ from app.schemas import (
 )
 
 STATIC_DIR = Path(__file__).resolve().parent / "static"
+WEB_DIR = Path(__file__).resolve().parents[1] / "web" / "public"
+SINGLE_SERVICE = settings.SERVICE_MODE != "split"
+
+# Windows can map .js to text/plain through the registry, which breaks ES modules.
+mimetypes.add_type("application/javascript", ".js")
 WARNING = (
     "Chỉ phục vụ mục đích giáo dục, không thay thế chẩn đoán y khoa. "
     "Educational use only; not a medical diagnosis."
@@ -47,6 +60,15 @@ async def lifespan(app: FastAPI):
         log.info("model loaded version=%s threshold=%s", service.metadata["model_version"], service.threshold)
     else:
         log.error("model not loaded: %s", service.error)
+    dashboard_api.load_comparison()
+    if SINGLE_SERVICE:
+        # Render's disk is wiped on every deploy: recreate the demo account and the first comparison run.
+        try:
+            import seed
+
+            seed.seed_database(log=lambda message: log.info("%s", message))
+        except Exception as exc:  # noqa: BLE001 - the model API must still start
+            log.warning("seeding the database failed: %s", exc)
     yield
 
 
@@ -118,9 +140,11 @@ def run_prediction(rows: list[dict[str, float]]) -> list[dict]:
 
 @app.get("/", tags=["Dịch vụ"], response_model=None)
 def root(request: Request):
-    """Service info as JSON; a browser (Accept: text/html) gets the demo UI instead."""
+    """Service info as JSON; a browser (Accept: text/html) gets the dashboard instead."""
     if "text/html" in request.headers.get("accept", ""):
-        return FileResponse(STATIC_DIR / "index.html")
+        if SINGLE_SERVICE:
+            return FileResponse(WEB_DIR / "index.html")
+        return RedirectResponse(settings.get("WEB_URL", "http://127.0.0.1:8080/"))
     return {
         "service": "Breast Cancer SVM API",
         "docs": "/docs",
@@ -131,8 +155,11 @@ def root(request: Request):
 
 
 @app.get("/ui", include_in_schema=False)
-def ui():
-    return FileResponse(STATIC_DIR / "index.html")
+def ui(request: Request):
+    """Old demo address: open the dashboard's diagnosis page, keeping ?sample=...&auto=1."""
+    base = "/" if SINGLE_SERVICE else settings.get("WEB_URL", "http://127.0.0.1:8080/")
+    query = f"?{request.url.query}" if request.url.query else ""
+    return RedirectResponse(f"{base}{query}#/chan-doan")
 
 
 @app.get("/health", tags=["Dịch vụ"])
@@ -180,3 +207,22 @@ def samples(
     require_model()
     items = service.pick_samples(n, label, seed)
     return {"source": "tập kiểm tra (test split 20%, random_state=42)", "count": len(items), "items": items}
+
+
+app.include_router(dashboard_api.router)
+
+if SINGLE_SERVICE:
+    # One process for Render's free plan: database API under /db, web module at /.
+    from db_api.main import app as db_app
+
+    app.mount("/db", db_app)
+
+    @app.get("/config.js", include_in_schema=False)
+    def web_config():
+        """API addresses for the web module: same origin, database API under /db."""
+        config = {"modelApi": "", "dbApi": "/db"}
+        return Response(f"window.APP_CONFIG = {json.dumps(config)};\n", media_type="application/javascript")
+
+    if WEB_DIR.exists():
+        # Mounted last so every API route above keeps priority over static files.
+        app.mount("/", StaticFiles(directory=WEB_DIR, html=True), name="web")
