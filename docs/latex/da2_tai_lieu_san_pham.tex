@@ -197,8 +197,9 @@ quanh sự bất đối xứng này.
   \item Đánh giá theo hướng y khoa: sensitivity, specificity, precision, F1, ROC-AUC, PR-AUC; chọn \emph{ngưỡng
         quyết định} trên dữ liệu kiểm định để hạn chế bỏ sót ca ác tính, khoá ngưỡng rồi mới chạy tập kiểm tra.
   \item Lưu mô hình cùng metadata có phiên bản, kiểm tra tính nhất quán của đặc trưng khi phục vụ.
-  \item Thiết kế REST API bằng FastAPI và Pydantic, kèm giao diện web demo; kiểm thử tự động và triển khai
-        trực tuyến trên Render.
+  \item Thiết kế REST API bằng FastAPI và Pydantic; kiểm thử tự động và triển khai trực tuyến trên Render.
+  \item Xây bảng điều khiển web ba module (giao diện, API mô hình, API cơ sở dữ liệu) có đăng nhập, lịch sử dự đoán,
+        so sánh năm mô hình phân loại, xuất Excel và hình ảnh tế bào học có ghi nguồn (mục~\ref{sec:he-thong}).
   \item Nêu rõ giới hạn về dữ liệu, bảo mật và việc sử dụng trong y tế.
 \end{itemize}
 
@@ -651,7 +652,11 @@ joblib & Lưu và nạp toàn bộ pipeline đã huấn luyện \\
 FastAPI & Khung REST API: định tuyến, sinh tài liệu OpenAPI và Swagger UI tự động \\
 Pydantic v2 & Khai báo và kiểm tra schema 30 trường đầu vào (kiểu, miền giá trị), sinh lỗi 422 \\
 Uvicorn & Máy chủ ASGI chạy ứng dụng FastAPI \\
-HTML / CSS / JavaScript & Giao diện demo tĩnh, không framework, gọi API bằng \texttt{fetch} \\
+HTML / CSS / JavaScript & Bảng điều khiển web (SPA), không framework, gọi hai API bằng \texttt{fetch} \\
+Chart.js, Lucide, Be Vietnam Pro & Biểu đồ, icon và font của giao diện --- tải sẵn trong dự án, không dùng CDN \\
+SQLite & Cơ sở dữ liệu của API CSDL: tài khoản, lịch sử dự đoán, kết quả các lần train \\
+bcrypt, PyJWT & Băm mật khẩu có muối; phát và xác minh token đăng nhập (HMAC-SHA256) \\
+openpyxl & Xuất lịch sử và bảng so sánh mô hình ra tệp Excel \\
 pytest, httpx, ruff & Kiểm thử tự động (TestClient) và kiểm tra phong cách mã \\
 GitHub, GitHub Actions & Quản lý mã nguồn; CI chạy lint, kiểm thử, huấn luyện lại và smoke test mỗi lần push \\
 Render & Nền tảng chạy dịch vụ web (gói Free), triển khai bằng Blueprint \texttt{render.yaml}, HTTPS sẵn có \\
@@ -675,15 +680,20 @@ Gói Free đủ cho demo, đổi lại dịch vụ ngủ sau khoảng 15 phút k
 \subsection{Cấu trúc kho mã nguồn}
 \begin{lstlisting}[language={},numbers=none,caption={Cấu trúc thư mục}]
 breast-cancer-svm/
-|-- app/          main.py, schemas.py, model_service.py, static/ (giao dien)
+|-- app/          API mo hinh: main.py, schemas.py, model_service.py, comparison.py,
+|                 dashboard_api.py, classes.py, static/images (anh te bao hoc)
+|-- db_api/       API CSDL: main.py, auth.py, history.py, runs.py, export.py, db.py, migrations/
+|-- web/          module web: server.py, public/ (index.html, css, js, fonts, vendor)
+|-- settings.py, security.py, seed.py
 |-- artifacts/    breast_cancer_svm.joblib, metadata.json, test_samples.json
-|-- scripts/      train.py, evaluate.py, make_sample_request.py, smoke_test.py
-|-- tests/        test_api.py, test_model.py
-|-- reports/      metrics.json, train_report.json, figures/
+|-- scripts/      train.py, train_comparison.py, evaluate.py, make_sample_request.py, smoke_test.py
+|-- tests/        test_api.py, test_model.py, test_auth.py, test_history.py, test_export.py,
+|                 test_dashboard.py
+|-- reports/      metrics.json, comparison.json, train_report.json, figures/
 |-- docs/         latex/, model-card.md, kich-ban-demo.md, screenshots/
 |-- .github/workflows/ci.yml
-|-- requirements.txt, requirements-dev.txt, render.yaml, Makefile, tasks.ps1
-`-- README.md
+|-- requirements.txt, requirements-dev.txt, render.yaml, Makefile, tasks.ps1, .env.example
+`-- README.md, CREDITS.md
 \end{lstlisting}
 
 \subsection{Artifact và metadata}
@@ -703,17 +713,20 @@ scikit-learn đang chạy trùng với lúc huấn luyện; sai lệch thì khô
 \toprule
 Method & Đường dẫn & Chức năng \\
 \midrule
-GET  & \texttt{/} & Thông tin dịch vụ (JSON); trình duyệt được trả giao diện demo \\
+GET  & \texttt{/} & Thông tin dịch vụ (JSON); trình duyệt được trả bảng điều khiển \\
 GET  & \texttt{/health} & 200 khi mô hình đã nạp; 503 nếu artifact lỗi (Render dùng làm health check) \\
 GET  & \texttt{/metadata} & Phiên bản, tên và miền của 30 đặc trưng, ánh xạ nhãn, ngưỡng, chỉ số test, cảnh báo \\
 POST & \texttt{/predict} & Một bản ghi: 30 đặc trưng dạng phẳng hoặc \texttt{\{"features": \{...\}\}} \\
 POST & \texttt{/predict/batch} & \texttt{\{"items": [...]\}}, từ 1 đến 100 bản ghi \\
 GET  & \texttt{/samples} & Mẫu ngẫu nhiên từ tập \emph{kiểm tra} kèm nhãn thật (\texttt{n}, \texttt{label}, \texttt{seed}) \\
 GET  & \texttt{/docs} & Swagger UI sinh tự động \\
-GET  & \texttt{/ui} & Giao diện demo \\
+GET  & \texttt{/ui} & Địa chỉ demo cũ, chuyển sang trang Chẩn đoán của bảng điều khiển \\
 \bottomrule
 \end{tabular}
 \end{table}
+
+Các endpoint phục vụ bảng điều khiển (lớp, thống kê, so sánh mô hình) và API cơ sở dữ liệu được trình bày ở
+mục~\ref{sec:he-thong}.
 
 Phản hồi của \texttt{/predict} gồm \texttt{predicted\_class}, \texttt{predicted\_label} (\texttt{malignant} /
 \texttt{benign}), \texttt{predicted\_label\_vi}, \texttt{probability\_malignant}, \texttt{probability\_benign},
@@ -759,6 +772,13 @@ INFO breast_cancer_api request_id=4bd29d4faca0 method=POST path=/predict status=
 phải trả đúng nhãn và xác suất đã ghi (kể cả ca bỏ sót và ca báo nhầm đã biết), chỉ số test trùng metadata và không
 thấp hơn mức tối thiểu, sensitivity out-of-fold đạt mục tiêu.
 
+Bốn tệp còn lại kiểm thử phần hệ thống (mục~\ref{sec:he-thong}): \texttt{test\_auth.py} (mật khẩu được băm bcrypt, trùng
+tên, đăng nhập đúng/sai, token sai, tài khoản demo được seed, train lại cần đăng nhập), \texttt{test\_history.py} (lưu
+và đọc lịch sử, mỗi người chỉ thấy và sửa được bản ghi của mình, nhãn thật, lọc theo mô hình),
+\texttt{test\_export.py} (tệp Excel có header đậm màu, đúng các sheet, tên tệp có thời gian) và
+\texttt{test\_dashboard.py} (ảnh có nguồn và tải được, thống kê theo lớp, PCA, bảng so sánh 5 mô hình, dòng SVM trong
+bảng khớp metadata của mô hình triển khai, chuyển hướng từ địa chỉ demo cũ).
+
 GitHub Actions (\texttt{.github/workflows/ci.yml}) chạy mỗi lần push: ruff, pytest trên artifact đã commit,
 \emph{huấn luyện lại từ đầu} rồi pytest lần nữa (chứng minh artifact tái lập được), sinh hình và smoke test trên
 máy chủ cục bộ.
@@ -770,7 +790,8 @@ Ba chi tiết dễ sai: đường dẫn ứng dụng \texttt{app.main:app} (gói
 \texttt{app}); \texttt{--host 0.0.0.0} để nhận kết nối từ ngoài container; \texttt{--port \$PORT} vì Render cấp cổng
 động. Dịch vụ phục vụ đúng artifact đã commit, \emph{không} huấn luyện lại lúc build: con số trong tài liệu, slide và
 API trực tuyến vì vậy là của cùng một mô hình. Phiên bản thư viện khoá trong \texttt{requirements.txt} và
-\texttt{PYTHON\_VERSION} trong \texttt{render.yaml}.
+\texttt{PYTHON\_VERSION} trong \texttt{render.yaml}. Biến \texttt{SERVICE\_MODE=single} cho một tiến trình chạy cả ba
+module; \texttt{JWT\_SECRET} do Render tự sinh một lần và không bao giờ nằm trong mã nguồn.
 
 \subsection{Các bước triển khai}
 \begin{enumerate}
@@ -802,7 +823,9 @@ Cách thủ công (\textbf{New} $\rightarrow$ \textbf{Web Service}) cũng đư�
 
 \subsection{Bảo mật và giám sát}
 \paragraph{Bảo mật.} HTTPS do Render cung cấp; API không thu thập dữ liệu định danh; log không chứa payload; giới
-hạn kích thước batch (100 bản ghi); không có secret nào trong mã nguồn. Nếu API không hoàn toàn công khai cần thêm
+hạn kích thước batch (100 bản ghi); không có secret nào trong mã nguồn. Mật khẩu chỉ lưu dạng băm bcrypt, token JWT
+có hạn dùng, mọi truy vấn lịch sử đều lọc theo \texttt{user\_id} của token; API CSDL chỉ nhận request từ trang web
+(CORS). Lịch sử lưu 30 số đo mà chính người dùng đã gửi --- không có trường nào cho tên hay mã bệnh nhân. Nếu API không hoàn toàn công khai cần thêm
 xác thực, rate limit và timeout ở lớp gateway, quy định thời gian lưu và quy trình xoá dữ liệu, quét phụ thuộc định kỳ.
 
 \paragraph{Giám sát.} Theo dõi tỷ lệ lỗi HTTP, độ trễ, số request và trạng thái health check (log có sẵn các trường
@@ -823,27 +846,200 @@ theo nhóm; duy trì phiên bản mô hình, khả năng rollback và quy trình
 \end{itemize}
 
 % =============================================================================
-\section{Demo}
+\section{Bảng điều khiển, tài khoản và so sánh mô hình}
+\label{sec:he-thong}
 % =============================================================================
 
-\subsection{Giao diện web}
-Mở \url{https://breast-cancer-svm-api-f2qq.onrender.com/ui} (hoặc địa chỉ gốc bằng trình duyệt). Giao diện gồm băng cảnh
-báo giáo dục luôn hiển thị, hai nút lấy mẫu ngẫu nhiên từ tập kiểm tra (ác tính / lành tính), form 30 trường chia ba
-nhóm \emph{trung bình}, \emph{sai số chuẩn}, \emph{xấu nhất}, và thẻ kết quả: nhãn dự đoán, thanh xác suất có vạch
-ngưỡng, quy tắc ``$P(\text{ác tính})$ so với ngưỡng'', so sánh với nhãn thật nếu dùng mẫu test. Thẻ ``Mô hình đang
-chạy'' lấy số liệu trực tiếp từ \texttt{/metadata}. Liên kết \texttt{/ui?sample=malignant\&auto=1} lấy mẫu và dự đoán
-ngay --- tiện cho trình chiếu.
+Ngoài API chẩn đoán theo bài giảng, sản phẩm được xây thành một hệ thống hoàn chỉnh theo cùng kiến trúc với dự án
+da1: giao diện bảng điều khiển, tài khoản người dùng, lịch sử dự đoán trong cơ sở dữ liệu, so sánh năm mô hình phân
+loại và xuất Excel. API \texttt{/predict} và các endpoint ở mục trên giữ nguyên --- phần này chỉ \emph{thêm}.
+
+\subsection{Kiến trúc ba module}
+
+\begin{table}[H]
+\centering
+\caption{Ba module của hệ thống}
+\small
+\begin{tabular}{@{}lllp{0.46\textwidth}@{}}
+\toprule
+Module & Mã nguồn & Cổng & Trách nhiệm \\
+\midrule
+Web & \texttt{web/} & 8080 & Giao diện; chỉ gọi hai API qua HTTP, không nạp mô hình, không mở CSDL \\
+API mô hình & \texttt{app/} & 8000 & Chẩn đoán SVM, so sánh 5 mô hình, thống kê dữ liệu, ảnh minh hoạ \\
+API CSDL & \texttt{db\_api/} & 8001 & Đăng ký/đăng nhập, lịch sử dự đoán, kết quả các lần train, xuất Excel \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Hai API không gọi nhau: trang web \emph{điều phối} --- gọi API mô hình để dự đoán hoặc train lại, rồi gửi kết quả sang
+API CSDL kèm token. API mô hình chỉ \emph{xác minh} token (dùng chung \texttt{JWT\_SECRET}) để khoá chức năng train lại.
+Hệ thống chạy được theo hai cách: \textbf{tách} ba tiến trình trên ba cổng (\texttt{tasks.ps1 run-split}) khi chạy ở
+máy, hoặc \textbf{gộp} (\texttt{SERVICE\_MODE=single}) trên gói Free của Render --- \texttt{uvicorn app.main:app} gắn API
+CSDL tại \texttt{/db} và phục vụ thư mục web tại \texttt{/}; mã của ba module vẫn tách riêng.
+
+\subsection{Tài khoản, lịch sử và cơ sở dữ liệu}
+API CSDL dùng SQLite, lược đồ tạo bằng các tệp migration đánh số trong \texttt{db\_api/migrations/} (mỗi tệp chạy một lần,
+ghi vào bảng \texttt{schema\_migrations}).
+
+\begin{table}[H]
+\centering
+\caption{Các bảng của cơ sở dữ liệu}
+\small
+\begin{tabular}{@{}lp{0.72\textwidth}@{}}
+\toprule
+Bảng & Nội dung \\
+\midrule
+\texttt{users} & tên đăng nhập (không phân biệt hoa thường), mật khẩu băm bcrypt, thời điểm tạo \\
+\texttt{predictions} & \texttt{user\_id}, thời điểm (UTC), mô hình, 30 số đo (JSON), nhãn dự đoán, $P(\text{ác tính})$,
+                       ngưỡng, nhãn thật (nếu có), mã mẫu test, thời gian chạy \\
+\texttt{training\_runs} & mỗi lần train: người train, thời điểm, số mẫu train/test, mục tiêu sensitivity, mô hình tốt nhất \\
+\texttt{model\_runs} & bảng đánh giá 5 mô hình của mỗi lần train: sensitivity, specificity, precision, F1, ROC-AUC, PR-AUC,
+                       Brier, ngưỡng, FN, FP, CV, thời gian, tham số tốt nhất \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Mật khẩu được băm bằng \textbf{bcrypt} có muối ngẫu nhiên; đăng nhập trả về \textbf{JWT} ký HMAC-SHA256 có hạn dùng. Truy
+vấn lịch sử luôn kèm \texttt{user\_id} của token, nên mỗi người chỉ thấy và sửa được bản ghi của mình. Khi lưu một dự
+đoán làm từ mẫu test, nhãn thật được ghi kèm để lịch sử cho biết đúng hay sai; người dùng cũng có thể ghi nhãn thật đã
+xác nhận cho bản ghi nhập tay. \textbf{Xuất Excel} (openpyxl) cho hai loại dữ liệu: lịch sử (theo bộ lọc ngày và mô hình;
+một sheet dự đoán, một sheet 30 số đo, một sheet bộ lọc) và bảng so sánh mô hình (lần train mới nhất kèm lịch sử mọi lần
+train); hàng tiêu đề in đậm nền tím, cột tự giãn, tên tệp có thời gian. Ổ đĩa gói Free của Render không bền nên SQLite
+được tạo lại mỗi lần khởi động; \texttt{seed.py} tạo lại tài khoản dùng thử \texttt{demo} / \texttt{demo123} và lần so
+sánh đầu tiên.
+
+\subsection{So sánh năm mô hình phân loại}
+Năm mô hình --- SVM kernel RBF (mô hình triển khai), SVM tuyến tính, Logistic Regression, K láng giềng gần và Random Forest
+--- đi qua \emph{đúng quy trình} của mô hình chính: \texttt{GridSearchCV} với \texttt{StratifiedKFold(5)} chấm bằng
+\texttt{recall\_macro} chỉ trên tập train; xác suất (hai mô hình SVM bọc trong \texttt{CalibratedClassifierCV}); ngưỡng
+riêng cho mỗi mô hình chọn trên xác suất out-of-fold để sensitivity $\geq \TargetSens$; đánh giá một lần trên tập test; đo
+thời gian train và thời gian dự đoán (trung bình mỗi mẫu qua 200 lần dự đoán cả tập test) bằng \texttt{time.perf\_counter}.
+Toàn bộ quy trình cho cả năm mô hình mất khoảng \CmpSeconds{} giây.
+
+\begin{table}[H]
+\centering
+\caption{So sánh năm mô hình trên tập kiểm tra, mỗi mô hình ở ngưỡng riêng (dòng in đậm: CV cao nhất)}
+\label{tab:so-sanh}
+\footnotesize
+\setlength{\tabcolsep}{3.5pt}
+\begin{tabular}{@{}lrrrrrrrr@{}}
+\toprule
+Mô hình & CV & Sens. & Spec. & ROC-AUC & Ngưỡng & FN/FP & Train (ms) & Predict ($\mu$s) \\
+\midrule
+\CmpRows
+\bottomrule
+\end{tabular}
+\end{table}
+
+Ba nhận xét:
+\begin{itemize}
+  \item \CmpBestLabel{} có CV recall\_macro cao nhất (\CmpBestCV{} $\pm$ \CmpBestCVStd), nhưng chỉ hơn SVM RBF
+        (\CmpSvmCV{} $\pm$ \CmpSvmCVStd) \CmpGap{} --- nhỏ hơn nhiều so với độ lệch giữa các fold. Trên dữ liệu này các
+        mô hình tốt tương đương nhau; sản phẩm vẫn triển khai SVM theo yêu cầu đề bài, và bảng so sánh được trình bày
+        đúng như kết quả đo được.
+  \item Ở cùng mục tiêu sensitivity, các mô hình khác nhau chủ yếu ở \emph{specificity} --- số ca báo nhầm phải trả để
+        giữ sensitivity cao. Đây là chỉ số nên nhìn khi so sánh mô hình sàng lọc.
+  \item Về tốc độ, \CmpFastestLabel{} dự đoán nhanh nhất (\CmpFastestUs{} $\mu$s mỗi mẫu). Giao diện gắn nhãn
+        \emph{Nhanh} (không quá \CmpSpeedFast{} lần mô hình nhanh nhất), \emph{Trung bình} (không quá \CmpSpeedMedium{}
+        lần) hoặc \emph{Chậm}. Với dữ liệu nhỏ, mọi thời gian chỉ tính bằng mili giây và dao động giữa các lần chạy; chỉ
+        thứ tự tương đối là đáng tin.
+\end{itemize}
+Người dùng đã đăng nhập có thể bấm \emph{Train lại} trên giao diện: API mô hình chạy lại toàn bộ quy trình, trang web lưu
+bảng kết quả vào \texttt{training\_runs} và \texttt{model\_runs}.
+
+\subsection{Giao diện bảng điều khiển}
+Giao diện tông tím lavender: thanh bên có ảnh thu nhỏ của hai loại khối u, thẻ trắng bo góc, biểu đồ vẽ bằng Chart.js.
+Font (Be Vietnam Pro), thư viện biểu đồ và bộ icon (Lucide) nằm trong dự án, không tải từ CDN. Mọi con số trên giao diện
+lấy từ API. Mỗi khối có trạng thái đang tải, rỗng và lỗi; dưới 1024\,px bố cục chuyển thành một cột và thanh bên thành
+dãy tab ngang.
+
+\paragraph{Hình ảnh.} Hai ảnh tế bào học là phết chọc hút kim nhỏ nhuộm Papanicolaou --- cùng loại mẫu mà bộ dữ liệu
+đo đặc trưng: u xơ tuyến vú (lành tính) và ung thư biểu mô ống tuyến vú (ác tính), tác giả Nephron, giấy phép
+CC BY-SA 3.0, từ Wikimedia Commons. Ảnh được tải về dự án (không liên kết trực tiếp); dưới mỗi ảnh lớn có chú thích
+``Nguồn: tác giả, giấy phép, liên kết''. Tệp \texttt{CREDITS.md} liệt kê nguồn của ảnh, icon, font, thư viện và dữ liệu.
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=\textwidth]{ui_ac_tinh.png}
-\caption{Giao diện demo: một mẫu ác tính của tập kiểm tra, dự đoán đúng}
+\includegraphics[width=\textwidth]{web_tong_quan.png}
+\caption{Trang Tổng quan: ảnh tế bào học, so sánh đặc trưng giữa hai nhóm, tỷ lệ lớp, đặc điểm nổi bật và nhận xét}
 \end{figure}
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=\textwidth]{ui_lanh_tinh.png}
-\caption{Giao diện demo: một mẫu lành tính, $P(\text{ác tính})$ nằm dưới ngưỡng}
+\includegraphics[width=\textwidth]{web_so_sanh.png}
+\caption{Trang So sánh mô hình: bảng xếp hạng, badge tốc độ, chỉ số tại ngưỡng, đường ROC và thời gian}
+\end{figure}
+
+\paragraph{Điểm nổi bật --- khám phá ngưỡng quyết định.} Trang \emph{Phân tích nâng cao} cho kéo một thanh trượt ngưỡng
+trên $P(\text{ác tính})$ của 114 mẫu test: ma trận nhầm lẫn, sensitivity, specificity, precision, số ca bỏ sót và báo
+nhầm, histogram xác suất theo nhãn thật (có vạch ngưỡng) và điểm vận hành trên đường ROC đều thay đổi tức thì; câu nhận
+xét so sánh với ngưỡng đã khoá. Công cụ này biến phần lý thuyết ở mục~\ref{sec:nguong} thành thứ người xem tự thử được,
+đồng thời nhắc rằng chọn lại ngưỡng theo tập test là rò rỉ thông tin. Trang có thêm biểu đồ PCA 2D của toàn bộ dữ liệu.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{web_phan_tich.png}
+\caption{Trang Phân tích nâng cao: khám phá ngưỡng, đường ROC với điểm vận hành, PCA 2D}
+\end{figure}
+
+\subsection{Các endpoint bổ sung}
+
+\begin{table}[H]
+\centering
+\caption{Endpoint bổ sung của API mô hình}
+\small
+\begin{tabular}{@{}llp{0.55\textwidth}@{}}
+\toprule
+Method & Đường dẫn & Chức năng \\
+\midrule
+GET  & \texttt{/classes} & Hai loại khối u: mô tả, ảnh, tác giả, giấy phép, nguồn \\
+GET  & \texttt{/dataset/summary} & Thống kê 30 đặc trưng theo lớp, các đặc trưng tách lớp rõ nhất \\
+GET  & \texttt{/dataset/pca} & PCA 2D của 569 mẫu chuẩn hoá \\
+GET  & \texttt{/models/metrics} & Bảng so sánh 5 mô hình \\
+POST & \texttt{/models/train} & Train lại 5 mô hình (cần JWT) \\
+GET  & \texttt{/analysis/test-scores} & Nhãn thật và $P(\text{ác tính})$ của 114 mẫu test \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Endpoint của API CSDL (trên Render có tiền tố \texttt{/db})}
+\small
+\begin{tabular}{@{}llp{0.52\textwidth}@{}}
+\toprule
+Method & Đường dẫn & Chức năng \\
+\midrule
+POST  & \texttt{/auth/register}, \texttt{/auth/login} & Đăng ký, đăng nhập; trả về JWT \\
+GET   & \texttt{/auth/me} & Thông tin tài khoản \\
+POST  & \texttt{/predictions} & Lưu một hoặc nhiều dự đoán \\
+GET   & \texttt{/predictions} & Lịch sử của chính người dùng, lọc ngày và mô hình, phân trang \\
+PATCH & \texttt{/predictions/\{id\}} & Ghi nhãn thật đã xác nhận \\
+POST  & \texttt{/model-runs} & Lưu bảng đánh giá của một lần train \\
+GET   & \texttt{/model-runs} & Các lần train gần nhất \\
+GET   & \texttt{/export/predictions.xlsx} & Xuất lịch sử ra Excel \\
+GET   & \texttt{/export/model-runs.xlsx} & Xuất bảng so sánh mô hình ra Excel \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% =============================================================================
+\section{Demo}
+% =============================================================================
+
+\subsection{Giao diện web}
+Mở \url{https://breast-cancer-svm-api-f2qq.onrender.com} bằng trình duyệt, chọn \emph{Chẩn đoán SVM} trên thanh bên.
+Trang gồm băng cảnh báo giáo dục luôn hiển thị, hai nút lấy mẫu ngẫu nhiên từ tập kiểm tra (ác tính / lành tính), form 30
+trường chia ba nhóm \emph{trung bình}, \emph{sai số chuẩn}, \emph{xấu nhất}, và thẻ kết quả: nhãn dự đoán, thanh xác
+suất có vạch ngưỡng, quy tắc ``$P(\text{ác tính})$ so với ngưỡng'', so sánh với nhãn thật nếu dùng mẫu test, ảnh tế bào
+học minh hoạ nhóm được dự đoán kèm nguồn, và nút \emph{Lưu vào lịch sử} (khi đã đăng nhập). Thẻ ``Mô hình đang chạy''
+lấy số liệu trực tiếp từ \texttt{/metadata}. Liên kết \texttt{/?sample=malignant\&auto=1} (hoặc địa chỉ cũ
+\texttt{/ui?sample=malignant\&auto=1}) lấy mẫu và dự đoán ngay --- tiện cho trình chiếu.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{web_chan_doan.png}
+\caption{Trang Chẩn đoán SVM: một mẫu ác tính của tập kiểm tra, dự đoán đúng}
 \end{figure}
 
 \subsection{Tài liệu API tương tác}
@@ -962,6 +1158,21 @@ mật và quản trị rủi ro là các phần bắt buộc của hệ thống 
 
 \subsection{tests/test\_api.py --- ma trận kiểm thử}
 \lstinputlisting[language=Python]{../../tests/test_api.py}
+
+\subsection{app/comparison.py --- so sánh năm mô hình phân loại}
+\lstinputlisting[language=Python]{../../app/comparison.py}
+
+\subsection{db\_api/auth.py --- đăng ký, đăng nhập}
+\lstinputlisting[language=Python]{../../db_api/auth.py}
+
+\subsection{db\_api/history.py --- lịch sử dự đoán}
+\lstinputlisting[language=Python]{../../db_api/history.py}
+
+\subsection{db\_api/export.py --- xuất Excel}
+\lstinputlisting[language=Python]{../../db_api/export.py}
+
+\subsection{security.py --- bcrypt và JWT}
+\lstinputlisting[language=Python]{../../security.py}
 
 \subsection{Tệp cấu hình}
 \lstinputlisting[caption={requirements.txt}]{../../requirements.txt}

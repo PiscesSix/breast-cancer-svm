@@ -132,3 +132,36 @@
   0.1 & 0.001 & 0.8624 $\pm$ 0.0428 & 16 \\
 }
 
+% ----- So sánh 5 mô hình phân loại (reports/comparison.json, train lúc 2026-09-27T06:34:11+00:00) -----
+\newcommand{\CmpNModels}{5}
+\newcommand{\CmpSeconds}{17.1}
+\newcommand{\CmpBestLabel}{Logistic Regression}
+\newcommand{\CmpBestCV}{0.9760}
+\newcommand{\CmpBestCVStd}{0.0116}
+\newcommand{\CmpSvmCV}{0.9753}
+\newcommand{\CmpSvmCVStd}{0.0162}
+\newcommand{\CmpGap}{0.0007}
+\newcommand{\CmpBestSpec}{0.9861}
+\newcommand{\CmpFastestLabel}{Logistic Regression}
+\newcommand{\CmpFastestUs}{4.3}
+\newcommand{\CmpSpeedFast}{1.5}
+\newcommand{\CmpSpeedMedium}{3}
+
+% Bảng so sánh (9 cột), dòng in đậm là mô hình có CV cao nhất
+\newcommand{\CmpRows}{%
+  \textbf{Logistic Regression} & 0.9760 & 0.9762 & 0.9861 & 0.9954 & 0.5783 & 1/1 & 9.7 & 4.3 \\
+  SVM (RBF) & 0.9753 & 0.9762 & 0.9306 & 0.9967 & 0.3993 & 1/5 & 45.9 & 21.7 \\
+  SVM tuyến tính & 0.9724 & 0.9762 & 0.9444 & 0.9960 & 0.3920 & 1/4 & 47.8 & 19.0 \\
+  Random Forest & 0.9613 & 0.9524 & 0.9444 & 0.9945 & 0.4900 & 2/4 & 153.5 & 82.4 \\
+  K láng giềng gần (KNN) & 0.9577 & 0.9762 & 0.8889 & 0.9944 & 0.3333 & 1/8 & 1.9 & 53.5 \\
+}
+
+% Bảng rút gọn cho slide (5 cột)
+\newcommand{\CmpRowsShort}{%
+  \textbf{Logistic Regression} & 0.9760 & 0.9762 & 0.9861 & 0.9954 \\
+  SVM (RBF) & 0.9753 & 0.9762 & 0.9306 & 0.9967 \\
+  SVM tuyến tính & 0.9724 & 0.9762 & 0.9444 & 0.9960 \\
+  Random Forest & 0.9613 & 0.9524 & 0.9444 & 0.9945 \\
+  K láng giềng gần (KNN) & 0.9577 & 0.9762 & 0.8889 & 0.9944 \\
+}
+

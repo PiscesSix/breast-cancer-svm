@@ -55,7 +55,8 @@ PACKAGES = {
 # The compact package keeps the files the lecture shows (train.py, main.py, requirements.txt,
 # render.yaml) and drops the rest of the appendix, for when Overleaf reports "compile timed out".
 APPENDIX_OPTIONAL = ["evaluate.py", "schemas.py", "model_service.py", "smoke_test.py", "make_sample_request.py",
-                     "test_api.py", "test_model.py", "app.js"]
+                     "test_api.py", "test_model.py", "app.js", "comparison.py", "auth.py", "history.py",
+                     "export.py", "security.py"]
 
 TRIM_NOTE = (
     "\n\\noindent\\textit{Phần phụ lục này in nguyên văn các tệp chính. Mã nguồn đầy đủ "

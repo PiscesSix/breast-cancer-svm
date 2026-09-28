@@ -306,11 +306,70 @@
 \end{lstlisting}
 \end{frame}
 
-\begin{frame}{Giao diện demo}
-  \centering
-  \includegraphics[width=0.86\textwidth]{ui_ac_tinh.png}
+\begin{frame}{Hệ thống 3 module: web · API mô hình · API CSDL}
+  \begin{columns}[T]
+    \begin{column}{0.5\textwidth}
+      \centering
+      \includegraphics[width=\textwidth]{web_tong_quan.png}
+    \end{column}
+    \begin{column}{0.48\textwidth}
+      \small
+      \begin{itemize}
+        \item \textbf{Web}: chỉ gọi 2 API qua HTTP --- không nạp mô hình, không mở CSDL
+        \item \textbf{API CSDL}: mật khẩu \alert{bcrypt}, đăng nhập \alert{JWT}, lịch sử riêng từng người, bảng các lần train
+        \item \textbf{Xuất Excel} (openpyxl): lịch sử theo bộ lọc, bảng so sánh mô hình
+        \item Ảnh tế bào học FNA (Wikimedia Commons, CC BY-SA 3.0) có ghi nguồn
+        \item Render: 1 tiến trình chạy cả 3 (\texttt{SERVICE\_MODE=single}); tài khoản thử \texttt{demo / demo123}
+      \end{itemize}
+    \end{column}
+  \end{columns}
+\end{frame}
 
-  \small Lấy mẫu test ngẫu nhiên · form 30 trường (mean / error / worst) · thanh xác suất có vạch ngưỡng · so với nhãn thật
+\begin{frame}{Chẩn đoán trên giao diện}
+  \centering
+  \includegraphics[width=0.84\textwidth]{web_chan_doan.png}
+
+  \small Mẫu test ngẫu nhiên · 30 trường (mean / error / worst) · thanh xác suất có vạch ngưỡng · so với nhãn thật · lưu lịch sử
+\end{frame}
+
+\begin{frame}{So sánh 5 mô hình phân loại}
+  \begin{columns}[T]
+    \begin{column}{0.5\textwidth}
+      \footnotesize
+      \begin{tabular}{@{}lrrrr@{}}
+        \toprule
+        Mô hình & CV & Sens. & Spec. & AUC \\
+        \midrule
+        \CmpRowsShort
+        \bottomrule
+      \end{tabular}
+      \vspace{6pt}
+
+      \small Cùng quy trình: GridSearchCV trên train, ngưỡng cho sensitivity $\ge$ \TargetSens, test một lần.
+      \CmpBestLabel{} CV cao nhất nhưng chỉ hơn SVM \CmpGap{} --- nhỏ hơn độ lệch giữa các fold.
+    \end{column}
+    \begin{column}{0.48\textwidth}
+      \centering
+      \includegraphics[width=\textwidth]{web_so_sanh.png}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Điểm nổi bật: khám phá ngưỡng quyết định}
+  \begin{columns}[T]
+    \begin{column}{0.58\textwidth}
+      \centering
+      \includegraphics[width=\textwidth]{web_phan_tich.png}
+    \end{column}
+    \begin{column}{0.4\textwidth}
+      \small
+      \begin{itemize}
+        \item Kéo ngưỡng trên $P(\text{ác tính})$ của 114 mẫu test
+        \item Ma trận nhầm lẫn, sensitivity, specificity, histogram và điểm trên đường ROC đổi \alert{tức thì}
+        \item Nhận xét so với ngưỡng đã khoá --- và nhắc: chọn lại ngưỡng theo tập test là rò rỉ
+      \end{itemize}
+    \end{column}
+  \end{columns}
 \end{frame}
 
 % =============================================================================
@@ -405,10 +464,12 @@ services:
   \begin{columns}[T]
     \begin{column}{0.55\textwidth}
       \begin{enumerate}
-        \item Mở \texttt{/ui} $\rightarrow$ \textbf{Mẫu ác tính} $\rightarrow$ Dự đoán
-        \item \textbf{Mẫu lành tính} $\rightarrow$ Dự đoán
-        \item Xoá một ô $\rightarrow$ gửi qua Swagger $\rightarrow$ \alert{422}
-        \item \texttt{/docs}, \texttt{/health}, \texttt{/metadata}
+        \item Tổng quan: ảnh tế bào, đặc trưng tách lớp
+        \item Đăng nhập \texttt{demo / demo123} $\rightarrow$ Chẩn đoán: mẫu ác tính, mẫu lành tính $\rightarrow$ Lưu
+        \item Lịch sử $\rightarrow$ \textbf{Xuất Excel}
+        \item So sánh mô hình $\rightarrow$ \textbf{Train lại}
+        \item Phân tích nâng cao: kéo ngưỡng
+        \item Swagger: xoá một trường $\rightarrow$ \alert{422}
       \end{enumerate}
       \vspace{8pt}
       \small Dịch vụ Free ngủ sau \textasciitilde15 phút: mở trước 1--2 phút
@@ -416,7 +477,7 @@ services:
     \begin{column}{0.43\textwidth}
       \begin{block}{Địa chỉ}
         \centering\small
-        \texttt{https://breast-cancer-svm-api-f2qq.onrender.com/ui}
+        \texttt{https://breast-cancer-svm-api-f2qq.onrender.com}
       \end{block}
     \end{column}
   \end{columns}

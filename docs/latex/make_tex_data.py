@@ -17,6 +17,7 @@ ROOT = DOCS.parents[1]
 METRICS = ROOT / "reports" / "metrics.json"
 METADATA = ROOT / "artifacts" / "metadata.json"
 OUT = DOCS / "metrics_data.tex"
+COMPARISON = ROOT / "reports" / "comparison.json"
 
 LABEL_VI = {"malignant": "ác tính", "benign": "lành tính"}
 CALIB_NOTE = {
@@ -160,9 +161,51 @@ def main() -> None:
     for r in sorted(m["grid_results"], key=lambda r: r["rank"]):
         lines.append(f"  {r['C']} & {r['gamma']} & {r['mean']:.4f} $\\pm$ {r['std']:.4f} & {r['rank']} \\\\")
     lines += ["}", ""]
+    if COMPARISON.exists():
+        lines += comparison_lines(json.loads(COMPARISON.read_text(encoding="utf-8")))
 
     OUT.write_text("\n".join(lines) + "\n", encoding="utf-8")
     print(f"Đã ghi {OUT.relative_to(ROOT)} ({len(lines)} dòng)")
+
+
+def comparison_lines(r: dict) -> list[str]:
+    """Macros for the five-classifier comparison (reports/comparison.json)."""
+    rows = sorted(r["models"], key=lambda m: (-m["cv_mean"], -m["roc_auc"]))
+    by_key = {m["model"]: m for m in r["models"]}
+    best, svm = by_key[r["best_model"]], by_key["svm_rbf"]
+    fastest = min(r["models"], key=lambda m: m["predict_ms_per_sample"])
+    lines = [
+        f"% ----- So sánh 5 mô hình phân loại (reports/comparison.json, train lúc {r['trained_at']}) -----",
+        macro("CmpNModels", len(r["models"])),
+        macro("CmpSeconds", f"{r['total_seconds']:.1f}"),
+        macro("CmpBestLabel", best["label"]),
+        macro("CmpBestCV", f4(best["cv_mean"])),
+        macro("CmpBestCVStd", f4(best["cv_std"])),
+        macro("CmpSvmCV", f4(svm["cv_mean"])),
+        macro("CmpSvmCVStd", f4(svm["cv_std"])),
+        macro("CmpGap", f4(best["cv_mean"] - svm["cv_mean"])),
+        macro("CmpBestSpec", f4(best["specificity"])),
+        macro("CmpFastestLabel", fastest["label"]),
+        macro("CmpFastestUs", f"{fastest['predict_ms_per_sample'] * 1000:.1f}"),
+        macro("CmpSpeedFast", f"{r['speed_thresholds']['fast']:g}"),
+        macro("CmpSpeedMedium", f"{r['speed_thresholds']['medium']:g}"),
+        "",
+        "% Bảng so sánh (9 cột), dòng in đậm là mô hình có CV cao nhất",
+        r"\newcommand{\CmpRows}{%",
+    ]
+    for m in rows:
+        name = f"\\textbf{{{m['label']}}}" if m["model"] == r["best_model"] else m["label"]
+        lines.append(
+            f"  {name} & {f4(m['cv_mean'])} & {f4(m['sensitivity'])} & {f4(m['specificity'])} & {f4(m['roc_auc'])} "
+            f"& {f4(m['threshold'])} & {m['false_negatives']}/{m['false_positives']} "
+            f"& {m['train_seconds'] * 1000:.1f} & {m['predict_ms_per_sample'] * 1000:.1f} \\\\")
+    lines += ["}", "", "% Bảng rút gọn cho slide (5 cột)", r"\newcommand{\CmpRowsShort}{%"]
+    for m in rows:
+        name = f"\\textbf{{{m['label']}}}" if m["model"] == r["best_model"] else m["label"]
+        lines.append(f"  {name} & {f4(m['cv_mean'])} & {f4(m['sensitivity'])} & {f4(m['specificity'])} "
+                     f"& {f4(m['roc_auc'])} \\\\")
+    lines += ["}", ""]
+    return lines
 
 
 if __name__ == "__main__":

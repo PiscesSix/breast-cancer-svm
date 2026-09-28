@@ -59,6 +59,7 @@ SPECIAL: dict[str, tuple[str, int]] = {
     "\u201c": ("``", 1),          # left double quote
     "\u201d": ("''", 1),          # right double quote
     "\u2026": (r"\dots", 3),      # ellipsis
+    "\u00b5": (r"$\mu$", 1),      # micro sign (µs)
 }
 
 HEADER = r"""% =============================================================================
