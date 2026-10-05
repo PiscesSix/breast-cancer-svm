@@ -10,7 +10,7 @@ export const MODEL_SHORT = {
 export const MODEL_COLORS = Object.fromEntries(MODEL_KEYS.map((k, i) => [k, PALETTE[i]]));
 export const CLASS_KEYS = ["benign", "malignant"];
 // Red / blue stay distinct for colour-blind readers (red / green does not); used by every class chart.
-export const CLASS_COLORS = { malignant: "#C92A2A", benign: "#1971C2" };
+export const CLASS_COLORS = { malignant: "#E5484D", benign: "#2E9E5B" };
 export const CLASS_VI = { malignant: "Ác tính", benign: "Lành tính" };
 export const WARNING = "Chỉ phục vụ mục đích giáo dục — không thay thế chẩn đoán y khoa.";
 

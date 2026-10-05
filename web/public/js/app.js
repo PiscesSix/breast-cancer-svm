@@ -1,26 +1,30 @@
-// Shell of the single-page app: hash router, sidebar, header pill and user menu.
-import { modelApi, modelAsset } from "./api.js";
+// Shell of the single-page app: hash router, navy sidebar, top bar (theme switch, user menu) and page header.
+import { modelApi } from "./api.js";
 import { clearAuth, getAuth, onAuthChange } from "./auth.js";
-import { destroyAll } from "./charts.js";
+import { applyChartTheme, destroyAll } from "./charts.js";
 import { icon } from "./icons.js";
-import { CLASS_KEYS, CLASS_VI, esc, toast } from "./ui.js";
+import { CLASS_KEYS, esc, toast } from "./ui.js";
 
+// Sidebar order follows docs/mockup/bt2-chan-doan-svm-threshold.png.
 const ROUTES = {
-  "tong-quan": { module: "./pages/overview.js", label: "Tổng quan", icon: "layout-dashboard", group: "main" },
-  "chan-doan": { module: "./pages/diagnose.js", label: "Chẩn đoán SVM", icon: "microscope", group: "main" },
-  "so-sanh": { module: "./pages/compare.js", label: "So sánh mô hình", icon: "chart-column", group: "main" },
-  "lich-su": { module: "./pages/history.js", label: "Lịch sử", icon: "history", group: "main" },
-  "du-lieu-sql": { module: "./pages/sql.js", label: "Dữ liệu SQL", icon: "database", group: "main", badge: "SQL" },
-  "phan-tich": { module: "./pages/analysis.js", label: "Phân tích nâng cao", icon: "chart-scatter", group: "highlight" },
-  "dang-nhap": { module: "./pages/login.js", label: "Đăng nhập", icon: "log-in", group: "hidden" },
+  "tong-quan": { module: "./pages/overview.js", label: "Tổng quan", icon: "house" },
+  "chan-doan": { module: "./pages/diagnose.js", label: "Chẩn đoán SVM", icon: "brain" },
+  "so-sanh": { module: "./pages/compare.js", label: "So sánh mô hình", icon: "chart-no-axes-column" },
+  "phan-tich": { module: "./pages/analysis.js", label: "Phân tích nâng cao", icon: "trending-up" },
+  "lich-su": { module: "./pages/history.js", label: "Lịch sử", icon: "clock" },
+  "du-lieu-sql": { module: "./pages/sql.js", label: "Dữ liệu SQL", icon: "database", badge: "SQL" },
+  "diem-noi-bat": { module: "./pages/highlights.js", label: "Điểm nổi bật", icon: "star" },
+  "dang-nhap": { module: "./pages/login.js", label: "Đăng nhập", icon: "log-in", hidden: true },
 };
 const DEFAULT_ROUTE = "tong-quan";
 const CLASS_KEY = "bc-class";
+const THEME_KEY = "bc-theme";
 
 const view = document.getElementById("view");
 const state = {
   cls: readClass(),
   classInfo: {},   // from GET /classes on the model API
+  health: null,    // last GET /health result (sidebar status)
   renderId: 0,
   route: null,
 };
@@ -41,89 +45,89 @@ function currentRoute() {
 
 // ------------------------------------------------------------------ sidebar
 
-const LINEART = `
-<svg class="lineart" viewBox="0 0 180 90" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" aria-hidden="true">
-  <circle cx="42" cy="46" r="17"/><circle cx="42" cy="46" r="6"/>
-  <circle cx="92" cy="38" r="13"/><circle cx="93" cy="37" r="4.5"/>
-  <circle cx="136" cy="52" r="19"/><path d="M129 47c3-4 9-5 13-2 4 3 4 9 0 12-4 3-10 2-13-2"/>
-  <circle cx="70" cy="74" r="9"/><circle cx="70" cy="74" r="3"/>
-  <circle cx="160" cy="22" r="7"/><circle cx="18" cy="18" r="6"/>
-</svg>`;
-
 function navItem(name) {
   const r = ROUTES[name];
   const active = state.route === name ? " active" : "";
   const badge = r.badge ? `<span class="nav-badge">${esc(r.badge)}</span>` : "";
-  return `<a class="nav-item${active}" href="#/${name}">${icon(r.icon, 18)}<span>${esc(r.label)}</span>${badge}</a>`;
+  const current = active ? ' aria-current="page"' : "";
+  return `<a class="nav-item${active}" href="#/${name}"${current}>${icon(r.icon, 20)}<span>${esc(r.label)}</span>${badge}</a>`;
 }
 
 function renderSidebar() {
-  const classes = CLASS_KEYS.map(key => {
-    const info = state.classInfo[key];
-    const active = state.cls === key && state.route === "tong-quan" ? " active" : "";
-    const thumb = info
-      ? `<img class="thumb" src="${esc(modelAsset(info.image_url))}" alt="" title="Ảnh: ${esc(info.author)} (${esc(info.license)})" loading="lazy">`
-      : `<span class="thumb"></span>`;
-    return `<button class="nav-item${active}" type="button" data-class="${key}">${thumb}<span>${CLASS_VI[key]}</span></button>`;
-  }).join("");
-
+  const h = state.health;
+  const status = h === null ? ["", "Đang kiểm tra API…", ""]
+    : h.ok ? ["ok", "API Online", `v${h.version}`] : ["bad", "API Offline", ""];
   document.getElementById("sidebar").innerHTML = `
-    <div class="side-group">
-      <div class="side-title">Trang</div>
-      ${Object.keys(ROUTES).filter(n => ROUTES[n].group === "main").map(navItem).join("")}
-    </div>
-    <div class="side-group">
-      <div class="side-title"><span class="star">${icon("sparkles", 14)}</span>Điểm nổi bật</div>
-      ${Object.keys(ROUTES).filter(n => ROUTES[n].group === "highlight").map(navItem).join("")}
-    </div>
-    <div class="side-group">
-      <div class="side-title">Loại khối u</div>
-      ${classes}
-      <p class="side-credit">Ảnh tế bào học: Wikimedia Commons — nguồn đầy đủ dưới ảnh lớn và trong CREDITS.md.</p>
-    </div>
-    <div class="side-foot">
-      ${LINEART}
-      <p class="quote">Phát hiện sớm là chìa khoá của điều trị ♥</p>
-      <div class="student">Sinh viên thực hiện<b>La Thị Mỹ Hoà</b>Lớp 24CKDL · Học máy nâng cao</div>
+    <div class="side-brand">${icon("ribbon", 40, "ribbon")}
+      <div><b>Chẩn đoán ung thư vú</b><span>SVM - Machine Learning</span></div></div>
+    <div class="side-nav">${Object.keys(ROUTES).filter(n => !ROUTES[n].hidden).map(navItem).join("")}</div>
+    <div class="side-bottom">
+      <div class="side-card">
+        <div class="side-card-head">${icon("shield", 20)}SVM - Breast Cancer</div>
+        <p>Ứng dụng Machine Learning chẩn đoán ung thư vú dựa trên bộ dữ liệu Wisconsin.</p>
+      </div>
+      <div class="side-status"><span><span class="dot ${status[0]}"></span>${status[1]}</span><span>${esc(status[2])}</span></div>
+      <div class="side-tech">FastAPI · Render</div>
     </div>`;
+}
 
-  document.querySelectorAll("[data-class]").forEach(btn => {
-    btn.addEventListener("click", () => setClass(btn.dataset.class));
-  });
+async function checkHealth() {
+  try {
+    const h = await modelApi("/health");
+    state.health = { ok: true, version: h.model_version };
+  } catch (_) {
+    state.health = { ok: false };
+  }
+  renderSidebar();
 }
 
 function setClass(key) {
   state.cls = key;
   try { localStorage.setItem(CLASS_KEY, key); } catch (_) { /* storage blocked */ }
-  renderPill();
   if (state.route === "tong-quan") render();
   else location.hash = "#/tong-quan";
 }
 
-function renderPill() {
-  document.getElementById("viewingPill").innerHTML =
-    `${icon("microscope", 16)}<span>Đang xem: <b>${CLASS_VI[state.cls]}</b></span>`;
+// ------------------------------------------------------------------ theme
+
+function isDark() {
+  return document.documentElement.dataset.theme === "dark";
 }
+
+function renderThemeButton() {
+  const btn = document.getElementById("themeBtn");
+  btn.innerHTML = icon(isDark() ? "moon" : "sun", 20);
+  btn.title = isDark() ? "Đang dùng giao diện tối — bấm để chuyển sang sáng" : "Đang dùng giao diện sáng — bấm để chuyển sang tối";
+}
+
+document.getElementById("themeBtn").addEventListener("click", () => {
+  const dark = !isDark();
+  if (dark) document.documentElement.dataset.theme = "dark";
+  else delete document.documentElement.dataset.theme;
+  try { localStorage.setItem(THEME_KEY, dark ? "dark" : "light"); } catch (_) { /* storage blocked */ }
+  renderThemeButton();
+  applyChartTheme();
+  render();  // charts take their colours when created
+});
 
 // ------------------------------------------------------------------ user menu
 
 function renderUserMenu() {
   const auth = getAuth();
   const box = document.getElementById("userMenu");
-  if (!auth) {
-    box.innerHTML = `<a class="btn ghost small" href="#/dang-nhap">${icon("log-in", 16)}Đăng nhập</a>`;
-    return;
-  }
-  const name = auth.user.username;
+  const name = auth ? auth.user.username : "Khách";
+  const items = auth
+    ? `<div class="meta">Đã đăng nhập bằng JWT</div>
+       <a href="#/lich-su" role="menuitem">${icon("history", 16)}Lịch sử của tôi</a>
+       <button type="button" data-logout role="menuitem">${icon("log-out", 16)}Đăng xuất</button>`
+    : `<div class="meta">Chưa đăng nhập</div>
+       <a href="#/dang-nhap" role="menuitem">${icon("log-in", 16)}Đăng nhập / Đăng ký</a>`;
   box.innerHTML = `
     <button class="user-btn" type="button" aria-haspopup="true" aria-expanded="false">
-      <span class="avatar">${esc(name.charAt(0).toUpperCase())}</span><span>${esc(name)}</span>
+      <span class="avatar">${auth ? esc(name.charAt(0).toUpperCase()) : icon("user-round", 18)}</span>
+      <span>${esc(name)}</span>${icon("chevron-down", 16)}
     </button>
-    <div class="menu" role="menu">
-      <div class="meta">Đã đăng nhập bằng JWT</div>
-      <a href="#/lich-su" role="menuitem">${icon("history", 16)}Lịch sử của tôi</a>
-      <button type="button" data-logout role="menuitem">${icon("log-out", 16)}Đăng xuất</button>
-    </div>`;
+    <div class="menu" role="menu">${items}</div>`;
   const btn = box.querySelector(".user-btn");
   const menu = box.querySelector(".menu");
   btn.addEventListener("click", e => {
@@ -131,7 +135,8 @@ function renderUserMenu() {
     const open = menu.classList.toggle("open");
     btn.setAttribute("aria-expanded", String(open));
   });
-  box.querySelector("[data-logout]").addEventListener("click", () => {
+  const logout = box.querySelector("[data-logout]");
+  if (logout) logout.addEventListener("click", () => {
     clearAuth();
     toast("Đã đăng xuất");
   });
@@ -146,7 +151,6 @@ async function render() {
   const id = ++state.renderId;
   destroyAll();
   renderSidebar();
-  renderPill();
 
   const route = ROUTES[name];
   let page;
@@ -158,7 +162,7 @@ async function render() {
   }
   if (id !== state.renderId) return;
 
-  document.getElementById("pageIcon").innerHTML = icon(page.icon || route.icon, 28);
+  document.getElementById("pageIcon").innerHTML = icon(page.icon || route.icon, 44);
   document.getElementById("pageTitle").textContent = page.title;
   document.getElementById("pageSub").textContent = page.subtitle;
   document.title = `${page.title} · Chẩn đoán ung thư vú`;
@@ -183,9 +187,8 @@ async function loadClasses() {
   try {
     const data = await modelApi("/classes");
     data.classes.forEach(c => { state.classInfo[c.key] = c; });
-    renderSidebar();
   } catch (_) {
-    /* thumbnails stay empty; each page shows its own error state */
+    /* each page shows its own error state */
   }
 }
 
@@ -199,6 +202,8 @@ onAuthChange(() => {
   renderUserMenu();
   render();
 });
+renderThemeButton();
 renderUserMenu();
 render();
 loadClasses();
+checkHealth();

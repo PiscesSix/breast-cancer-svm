@@ -1,7 +1,7 @@
 // Overview page, laid out like the reference dashboard. Every number comes from
 // GET /dataset/summary (computed from load_breast_cancer) and GET /classes.
 import { modelApi, modelAsset } from "../api.js";
-import { chart } from "../charts.js";
+import { chart, cssVar } from "../charts.js";
 import { icon } from "../icons.js";
 import { CLASS_COLORS, CLASS_KEYS, CLASS_VI, errorState, esc, num, onClick, skeleton } from "../ui.js";
 
@@ -81,6 +81,12 @@ export default {
         : "Không mẫu nào của nhóm này có độ lõm bằng 0.");
 
     view.innerHTML = `
+      <div class="page-tools">
+        <span>Loại khối u đang xem</span>
+        <div class="segmented" role="group" aria-label="Chọn loại khối u">
+          ${CLASS_KEYS.map(k => `<button type="button" data-class="${k}" class="${k === key ? "active" : ""}" aria-pressed="${k === key}">${CLASS_VI[k]}</button>`).join("")}
+        </div>
+      </div>
       <div class="grid overview">
         <section class="card area-photo">
           <div class="card-head"><div><h2>Tế bào ${esc(name.toLowerCase())}</h2><p class="sub">${esc(info.example)}</p></div></div>
@@ -143,7 +149,7 @@ export default {
         datasets: [{
           data: CLASS_KEYS.map(k => summary.classes[k].count),
           backgroundColor: CLASS_KEYS.map(k => CLASS_COLORS[k]),
-          borderColor: "#fff", borderWidth: 2, hoverOffset: 6,
+          borderColor: cssVar("--card"), borderWidth: 2, hoverOffset: 6,
         }],
       },
       options: {
@@ -154,5 +160,6 @@ export default {
         },
       },
     });
+    view.querySelectorAll("[data-class]").forEach(b => b.addEventListener("click", () => ctx.setClass(b.dataset.class)));
   },
 };

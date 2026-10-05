@@ -13,7 +13,7 @@ const BINS = 25;
 const TOP_FEATURES = 15;
 const METRIC_LINES = [
   { key: "sens", label: "Sensitivity", color: "#2F9E44" },
-  { key: "spec", label: "Specificity", color: CLASS_COLORS.benign },
+  { key: "spec", label: "Specificity", color: "#3B6FE0" },
   { key: "prec", label: "Precision", color: PALETTE[0] },
   { key: "f1", label: "F1-score", color: PALETTE[4] },
 ];
