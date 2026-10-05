@@ -1,8 +1,8 @@
 // Login / registration against the database API (bcrypt + JWT).
-import { dbApi } from "../api.js";
-import { getAuth, setAuth } from "../auth.js";
-import { icon } from "../icons.js";
-import { esc, toast } from "../ui.js";
+import { dbApi } from "../api.js?v=20261005";
+import { getAuth, setAuth } from "../auth.js?v=20261005";
+import { icon } from "../icons.js?v=20261005";
+import { esc, toast } from "../ui.js?v=20261005";
 
 export default {
   title: "Đăng nhập",

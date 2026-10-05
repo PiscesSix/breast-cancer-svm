@@ -1,13 +1,13 @@
 // Model comparison: five classifiers under the same protocol — leaderboard, clinical metrics, ROC curves,
 // timings with speed badges, retrain (stored in the database) and Excel export.
-import { dbApi, downloadFromDb, modelApi } from "../api.js";
-import { getAuth } from "../auth.js";
-import { chart } from "../charts.js";
-import { icon } from "../icons.js";
+import { dbApi, downloadFromDb, modelApi } from "../api.js?v=20261005";
+import { getAuth } from "../auth.js?v=20261005";
+import { chart } from "../charts.js?v=20261005";
+import { icon } from "../icons.js?v=20261005";
 import {
   duration, emptyState, errorState, esc, localTime, MODEL_COLORS, MODEL_SHORT, num, onClick, skeleton, speedBadge,
   toast,
-} from "../ui.js";
+} from "../ui.js?v=20261005";
 
 const DEPLOYED = "svm_rbf";
 

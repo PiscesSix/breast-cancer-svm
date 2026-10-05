@@ -143,7 +143,7 @@ def root(request: Request):
     """Service info as JSON; a browser (Accept: text/html) gets the dashboard instead."""
     if "text/html" in request.headers.get("accept", ""):
         if SINGLE_SERVICE:
-            return FileResponse(WEB_DIR / "index.html")
+            return FileResponse(WEB_DIR / "index.html", headers={"Cache-Control": "no-cache"})
         return RedirectResponse(settings.get("WEB_URL", "http://127.0.0.1:8080/"))
     return {
         "service": "Breast Cancer SVM API",
@@ -225,4 +225,6 @@ if SINGLE_SERVICE:
 
     if WEB_DIR.exists():
         # Mounted last so every API route above keeps priority over static files.
-        app.mount("/", StaticFiles(directory=WEB_DIR, html=True), name="web")
+        from web.static import WebStaticFiles
+
+        app.mount("/", WebStaticFiles(directory=WEB_DIR, html=True), name="web")

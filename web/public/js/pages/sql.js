@@ -1,9 +1,9 @@
 // Read-only view of the database behind the site (ported from da1): tables, live-refreshing rows and
 // free SELECT queries — the WDBC dataset table plus users, prediction history and training runs.
-import { dbApi, query } from "../api.js";
-import { getAuth } from "../auth.js";
-import { icon } from "../icons.js";
-import { duration, emptyState, errorState, esc, localTime, loginPrompt, onClick, skeleton, toast } from "../ui.js";
+import { dbApi, query } from "../api.js?v=20261005";
+import { getAuth } from "../auth.js?v=20261005";
+import { icon } from "../icons.js?v=20261005";
+import { duration, emptyState, errorState, esc, localTime, loginPrompt, onClick, skeleton, toast } from "../ui.js?v=20261005";
 
 const PAGE_SIZE = 20;
 const REFRESH_MS = 5000;

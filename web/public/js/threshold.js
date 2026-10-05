@@ -1,7 +1,7 @@
 // Decision threshold on P(malignant) shared by the diagnosis and the analysis pages. The default is
 // the threshold locked at training time (out-of-fold CV probabilities, sensitivity target), read from
 // GET /analysis/test-scores; the slider value lives for the browser session so both pages agree.
-import { modelApi } from "./api.js";
+import { modelApi } from "./api.js?v=20261005";
 
 const KEY = "bc-threshold";
 let scoresPromise = null;

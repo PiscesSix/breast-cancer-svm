@@ -3,11 +3,11 @@
 // points all follow the slider, whose value is shared with the diagnosis page — plus the permutation
 // importance of the 30 features (an RBF SVC has no coef_ / feature_importances_) and a PCA 2D view of
 // the dataset. Every remark is generated from the numbers.
-import { modelApi } from "../api.js";
-import { chart } from "../charts.js";
-import { icon } from "../icons.js";
-import { confusion, currentThreshold, saveThreshold, testScores } from "../threshold.js";
-import { CLASS_COLORS, CLASS_KEYS, CLASS_VI, PALETTE, errorState, esc, num, onClick, skeleton } from "../ui.js";
+import { modelApi } from "../api.js?v=20261005";
+import { chart } from "../charts.js?v=20261005";
+import { icon } from "../icons.js?v=20261005";
+import { confusion, currentThreshold, saveThreshold, testScores } from "../threshold.js?v=20261005";
+import { CLASS_COLORS, CLASS_KEYS, CLASS_VI, PALETTE, errorState, esc, num, onClick, skeleton } from "../ui.js?v=20261005";
 
 const BINS = 25;
 const TOP_FEATURES = 15;

@@ -1,5 +1,5 @@
 // Small rendering helpers shared by every page: escaping, number format, states, badges.
-import { icon } from "./icons.js";
+import { icon } from "./icons.js?v=20261005";
 
 // Chart palette from the reference design; one fixed colour per model.
 export const PALETTE = ["#6C63FF", "#B38BFA", "#5CB85C", "#6FA8DC", "#F4A261"];

@@ -1,5 +1,5 @@
 // The web module only talks to the two APIs over HTTP; their addresses come from config.js.
-import { clearAuth, token } from "./auth.js";
+import { clearAuth, token } from "./auth.js?v=20261005";
 
 const CONFIG = window.APP_CONFIG || { modelApi: "", dbApi: "/db" };
 export const MODEL_API = CONFIG.modelApi;

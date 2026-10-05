@@ -1,20 +1,20 @@
 // Shell of the single-page app: hash router, navy sidebar, top bar (theme switch, user menu) and page header.
-import { modelApi } from "./api.js";
-import { clearAuth, getAuth, onAuthChange } from "./auth.js";
-import { applyChartTheme, destroyAll } from "./charts.js";
-import { icon } from "./icons.js";
-import { CLASS_KEYS, esc, toast } from "./ui.js";
+import { modelApi } from "./api.js?v=20261005";
+import { clearAuth, getAuth, onAuthChange } from "./auth.js?v=20261005";
+import { applyChartTheme, destroyAll } from "./charts.js?v=20261005";
+import { icon } from "./icons.js?v=20261005";
+import { CLASS_KEYS, esc, toast } from "./ui.js?v=20261005";
 
 // Sidebar order follows docs/mockup/bt2-chan-doan-svm-threshold.png.
 const ROUTES = {
-  "tong-quan": { module: "./pages/overview.js", label: "Tổng quan", icon: "house" },
-  "chan-doan": { module: "./pages/diagnose.js", label: "Chẩn đoán SVM", icon: "brain" },
-  "so-sanh": { module: "./pages/compare.js", label: "So sánh mô hình", icon: "chart-no-axes-column" },
-  "phan-tich": { module: "./pages/analysis.js", label: "Phân tích nâng cao", icon: "trending-up" },
-  "lich-su": { module: "./pages/history.js", label: "Lịch sử", icon: "clock" },
-  "du-lieu-sql": { module: "./pages/sql.js", label: "Dữ liệu SQL", icon: "database", badge: "SQL" },
-  "diem-noi-bat": { module: "./pages/highlights.js", label: "Điểm nổi bật", icon: "star" },
-  "dang-nhap": { module: "./pages/login.js", label: "Đăng nhập", icon: "log-in", hidden: true },
+  "tong-quan": { module: "./pages/overview.js?v=20261005", label: "Tổng quan", icon: "house" },
+  "chan-doan": { module: "./pages/diagnose.js?v=20261005", label: "Chẩn đoán SVM", icon: "brain" },
+  "so-sanh": { module: "./pages/compare.js?v=20261005", label: "So sánh mô hình", icon: "chart-no-axes-column" },
+  "phan-tich": { module: "./pages/analysis.js?v=20261005", label: "Phân tích nâng cao", icon: "trending-up" },
+  "lich-su": { module: "./pages/history.js?v=20261005", label: "Lịch sử", icon: "clock" },
+  "du-lieu-sql": { module: "./pages/sql.js?v=20261005", label: "Dữ liệu SQL", icon: "database", badge: "SQL" },
+  "diem-noi-bat": { module: "./pages/highlights.js?v=20261005", label: "Điểm nổi bật", icon: "star" },
+  "dang-nhap": { module: "./pages/login.js?v=20261005", label: "Đăng nhập", icon: "log-in", hidden: true },
 };
 const DEFAULT_ROUTE = "tong-quan";
 const CLASS_KEY = "bc-class";

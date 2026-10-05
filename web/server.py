@@ -15,9 +15,9 @@ from pathlib import Path
 
 from fastapi import FastAPI
 from fastapi.responses import Response
-from fastapi.staticfiles import StaticFiles
 
 import settings
+from web.static import WebStaticFiles
 
 WEB_DIR = Path(__file__).resolve().parent / "public"
 
@@ -41,4 +41,4 @@ def health():
     return {"status": "healthy", "module": "web"}
 
 
-app.mount("/", StaticFiles(directory=WEB_DIR, html=True), name="web")
+app.mount("/", WebStaticFiles(directory=WEB_DIR, html=True), name="web")

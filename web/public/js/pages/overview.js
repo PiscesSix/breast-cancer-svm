@@ -1,9 +1,9 @@
 // Overview page, laid out like the reference dashboard. Every number comes from
 // GET /dataset/summary (computed from load_breast_cancer) and GET /classes.
-import { modelApi, modelAsset } from "../api.js";
-import { chart, cssVar } from "../charts.js";
-import { icon } from "../icons.js";
-import { CLASS_COLORS, CLASS_KEYS, CLASS_VI, errorState, esc, num, onClick, skeleton } from "../ui.js";
+import { modelApi, modelAsset } from "../api.js?v=20261005";
+import { chart, cssVar } from "../charts.js?v=20261005";
+import { icon } from "../icons.js?v=20261005";
+import { CLASS_COLORS, CLASS_KEYS, CLASS_VI, errorState, esc, num, onClick, skeleton } from "../ui.js?v=20261005";
 
 const other = key => (key === "malignant" ? "benign" : "malignant");
 

@@ -6,12 +6,12 @@
 // calls /predict again. The default threshold is the one locked at training time (out-of-fold CV
 // probabilities, sensitivity target); the slider value is shared with the analysis page.
 // Links such as /?sample=malignant&auto=1 load a test sample and predict at once (demo, screenshots).
-import { dbApi, modelApi } from "../api.js";
-import { getAuth } from "../auth.js";
-import { chart, cssVar } from "../charts.js";
-import { icon } from "../icons.js";
-import { confusion, currentThreshold, labelAt, saveThreshold, testScores } from "../threshold.js";
-import { CLASS_COLORS, CLASS_VI, errorState, esc, toast } from "../ui.js";
+import { dbApi, modelApi } from "../api.js?v=20261005";
+import { getAuth } from "../auth.js?v=20261005";
+import { chart, cssVar } from "../charts.js?v=20261005";
+import { icon } from "../icons.js?v=20261005";
+import { confusion, currentThreshold, labelAt, saveThreshold, testScores } from "../threshold.js?v=20261005";
+import { CLASS_COLORS, CLASS_VI, errorState, esc, toast } from "../ui.js?v=20261005";
 
 // Kaggle / UCI column stems (as in the mockup) and the Vietnamese name shown as a tooltip.
 const MEASURES = [

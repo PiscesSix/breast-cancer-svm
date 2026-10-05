@@ -1,8 +1,8 @@
 // "Điểm nổi bật": the project's key results at a glance and shortcuts to the features worth demoing.
 // Every number comes from GET /metadata, /models/metrics and /dataset/summary.
-import { modelApi } from "../api.js";
-import { icon } from "../icons.js";
-import { errorState, esc, num, onClick, skeleton } from "../ui.js";
+import { modelApi } from "../api.js?v=20261005";
+import { icon } from "../icons.js?v=20261005";
+import { errorState, esc, num, onClick, skeleton } from "../ui.js?v=20261005";
 
 const FEATURES = [
   ["chan-doan", "sliders-horizontal", "Thanh trượt ngưỡng", "Kéo ngưỡng P(ác tính): nhãn, donut và 4 chỉ số trên tập test đổi ngay, không gọi lại API."],

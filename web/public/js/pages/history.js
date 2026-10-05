@@ -1,11 +1,11 @@
 // Prediction history of the logged-in user: filters, pagination, confirmed labels, Excel export.
-import { dbApi, downloadFromDb, query } from "../api.js";
-import { getAuth } from "../auth.js";
-import { icon } from "../icons.js";
+import { dbApi, downloadFromDb, query } from "../api.js?v=20261005";
+import { getAuth } from "../auth.js?v=20261005";
+import { icon } from "../icons.js?v=20261005";
 import {
   CLASS_COLORS, CLASS_VI, duration, emptyState, errorState, esc, localTime, loginPrompt, MODEL_COLORS, MODEL_SHORT, num,
   onClick, skeleton, toast,
-} from "../ui.js";
+} from "../ui.js?v=20261005";
 
 const filters = { page: 1, page_size: 10, model: "", date_from: "", date_to: "" };
 
