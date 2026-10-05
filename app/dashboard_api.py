@@ -93,6 +93,14 @@ def _summary() -> dict:
             "feature_names": names, "feature_vi": {n: feature_vi(n) for n in names}, "classes": out}
 
 
+@lru_cache(maxsize=1)
+def default_sample() -> dict:
+    """Row 0 of the dataset: WDBC ID 842302 in the UCI / Kaggle file (sklearn keeps the same row order)."""
+    X, y, names, target_names = load_data()
+    return {"id": "WDBC 842302", "label": target_names[int(y[0])],
+            "features": {n: float(v) for n, v in zip(names, X[0], strict=True)}}
+
+
 @router.get("/dataset/summary", tags=["Dữ liệu"])
 def dataset_summary():
     """Per-class statistics of the 30 features and the features that separate the classes best."""

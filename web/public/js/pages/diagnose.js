@@ -5,7 +5,9 @@
 // the donut and recomputes the test-set metrics in the browser from GET /analysis/test-scores — it never
 // calls /predict again. The default threshold is the one locked at training time (out-of-fold CV
 // probabilities, sensitivity target); the slider value is shared with the analysis page.
-// Links such as /?sample=malignant&auto=1 load a test sample and predict at once (demo, screenshots).
+// The form opens pre-filled with the default record from GET /samples/default (WDBC ID 842302) and its
+// prediction; "Đặt lại" brings that record back. Links such as /?sample=malignant&auto=1 load a random
+// test sample instead and predict at once (demo, screenshots).
 import { dbApi, modelApi } from "../api.js?v=20261005";
 import { getAuth } from "../auth.js?v=20261005";
 import { chart, cssVar } from "../charts.js?v=20261005";
@@ -61,7 +63,7 @@ export default {
             <form id="form" novalidate>
               <div class="feat-cols">${fields()}</div>
               <div class="form-actions">
-                <button class="btn outline" type="button" id="clear">${icon("rotate-ccw", 16)}Đặt lại</button>
+                <button class="btn outline" type="button" id="clear" title="Khôi phục dữ liệu mặc định">${icon("rotate-ccw", 16)}Đặt lại</button>
                 <button class="btn cta" type="submit" id="predictBtn">${icon("play", 16)}Dự đoán</button>
                 <span class="sample-pick" title="Nạp ngẫu nhiên một mẫu của tập kiểm tra kèm nhãn thật">Mẫu test:
                   <button class="link-btn" type="button" data-sample="malignant">Ác tính</button>·
@@ -135,6 +137,22 @@ export default {
     }));
 
     const fill = values => inputs().forEach(el => { el.value = values[el.name] ?? ""; el.classList.remove("invalid"); });
+
+    const loadDefault = async () => {
+      try {
+        const s = await modelApi("/samples/default");
+        if (!ctx.alive()) return false;
+        fill(s.features);
+        sample = { id: s.id, label: s.label };
+        sampleInfo.hidden = false;
+        sampleInfo.innerHTML = `Dữ liệu mặc định: <b>${esc(s.id)}</b> (dòng đầu của bộ dữ liệu) · nhãn thật: <b>${CLASS_VI[s.label]}</b>`;
+        view.querySelector("#formHint").hidden = true;
+        return true;
+      } catch (err) {
+        toast(err.message);
+        return false;
+      }
+    };
 
     const loadSample = async label => {
       try {
@@ -370,11 +388,8 @@ export default {
 
     form.addEventListener("submit", predict);
     view.querySelectorAll("[data-sample]").forEach(b => b.addEventListener("click", () => loadSample(b.dataset.sample)));
-    view.querySelector("#clear").addEventListener("click", () => {
-      fill({});
-      sample = null;
-      sampleInfo.hidden = true;
-      view.querySelector("#formHint").hidden = true;
+    view.querySelector("#clear").addEventListener("click", async () => {
+      if (await loadDefault()) predict();
     });
     facts();
     await setupThreshold();
@@ -382,6 +397,10 @@ export default {
 
     const q = new URLSearchParams(location.search);
     const wanted = q.get("sample");
-    if ((wanted === "malignant" || wanted === "benign") && await loadSample(wanted) && q.get("auto") === "1") predict();
+    if (wanted === "malignant" || wanted === "benign") {
+      if (await loadSample(wanted) && q.get("auto") === "1") predict();
+    } else if (await loadDefault()) {
+      predict();
+    }
   },
 };

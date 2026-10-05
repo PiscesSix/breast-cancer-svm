@@ -34,6 +34,7 @@ from app.schemas import (
     BatchResponse,
     BreastCancerFeatures,
     PredictionResponse,
+    Sample,
     SamplesResponse,
 )
 
@@ -207,6 +208,12 @@ def samples(
     require_model()
     items = service.pick_samples(n, label, seed)
     return {"source": "tập kiểm tra (test split 20%, random_state=42)", "count": len(items), "items": items}
+
+
+@app.get("/samples/default", response_model=Sample, tags=["Dữ liệu mẫu"])
+def default_sample():
+    """Record pre-filled in the diagnosis form: row 0 of load_breast_cancer (WDBC ID 842302), with its true label."""
+    return dashboard_api.default_sample()
 
 
 app.include_router(dashboard_api.router)

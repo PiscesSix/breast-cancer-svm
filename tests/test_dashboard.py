@@ -97,3 +97,12 @@ def test_dashboard_and_old_ui_address(client):
     redirect = client.get("/ui?sample=malignant&auto=1", follow_redirects=False)
     assert redirect.status_code == 307 and redirect.headers["location"] == "/?sample=malignant&auto=1#/chan-doan"
     assert client.get("/config.js").status_code == 200
+
+
+def test_default_sample_is_wdbc_842302(client):
+    """The diagnosis form opens with this record; it must be predictable as-is and be malignant."""
+    body = client.get("/samples/default").json()
+    assert body["id"] == "WDBC 842302" and body["label"] == "malignant"
+    assert len(body["features"]) == 30 and body["features"]["mean radius"] == 17.99
+    pred = client.post("/predict", json=body["features"]).json()
+    assert pred["predicted_label"] == "malignant"
