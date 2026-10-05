@@ -431,3 +431,45 @@ table.data tr.best td:first-child { box-shadow: inset 3px 0 0 var(--primary); }
   .sticky-side { position: static; }
   .stat-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
+
+/* ------------------------------------------------------------ threshold slider, result, metrics (diagnosis) */
+.card h2.h-icon { display: flex; align-items: center; gap: 8px; }
+.card h2.h-icon .icon { color: var(--primary); }
+.card h2 small { font-weight: 500; color: var(--muted); font-size: 13px; }
+.t-pill { padding: 6px 12px; border-radius: 10px; background: var(--lavender); color: var(--primary); font-weight: 800; font-size: 16px; font-variant-numeric: tabular-nums; }
+.range-ends { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); margin-top: 2px; }
+.result-split { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); gap: 14px; align-items: center; }
+.result-split .verdict { display: flex; align-items: center; gap: 12px; margin: 0; padding: 18px 16px; }
+.result-split .verdict.malignant .icon { color: var(--malignant); }
+.result-split .verdict.benign .icon { color: var(--benign); }
+.prob-rows { display: grid; gap: 4px; }
+.prob-rows .track { margin-bottom: 8px; }
+.metric-tiles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.metric-tile { border-radius: 12px; padding: 12px 14px; border: 1px solid var(--border); }
+.metric-tile span { display: block; font-size: 12.5px; color: var(--muted); font-weight: 600; }
+.metric-tile b { display: block; font-size: 22px; font-weight: 800; font-variant-numeric: tabular-nums; margin-top: 2px; }
+.metric-tile.sens { background: var(--ok-bg); } .metric-tile.sens b { color: var(--ok); }
+.metric-tile.spec { background: var(--benign-bg); } .metric-tile.spec b { color: var(--benign); }
+.metric-tile.prec { background: var(--lavender); } .metric-tile.prec b { color: var(--primary); }
+.metric-tile.f1 { background: var(--warn-bg); } .metric-tile.f1 b { color: var(--warn); }
+.target-row { display: grid; grid-template-columns: 24px 1fr auto; gap: 10px; align-items: center; margin-top: 10px; padding: 10px 12px; border-radius: 12px; background: #FAFAFE; border: 1px solid var(--border); }
+.target-row .icon { color: var(--ok); }
+.target-row b { display: block; color: var(--title); font-size: 13.5px; }
+.target-row code { font-size: 12px; color: var(--ok); }
+.timing b { font-size: 26px; color: var(--title); font-variant-numeric: tabular-nums; }
+.timing span { display: block; color: var(--muted); font-size: 12.5px; }
+table.info-table th { color: var(--muted); font-weight: 500; font-size: 12.5px; padding: 8px 10px 8px 0; border-bottom: 1px solid var(--border); text-align: left; white-space: nowrap; }
+table.info-table td { color: var(--title); font-weight: 600; padding: 8px 0; }
+.donut-wrap.compact { grid-template-columns: minmax(140px, 170px) 1fr; gap: 16px; }
+.donut-wrap.compact .donut-box { height: 170px; }
+.donut-wrap.compact .donut-center b { font-size: 18px; }
+.donut-wrap.compact .legend li span:nth-child(2) { white-space: nowrap; }
+@media (max-width: 640px) {
+  .result-split { grid-template-columns: minmax(0, 1fr); }
+  .donut-wrap.compact { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* ------------------------------------------------------------ "Dữ liệu SQL" page */
+.nav-badge { margin-left: auto; padding: 1px 7px; border-radius: 6px; background: var(--ok-bg); color: var(--ok); font-size: 10.5px; font-weight: 800; letter-spacing: .03em; }
+table.sql-data td { white-space: nowrap; font-size: 12.5px; padding: 8px 10px; }
+.sql-box { font-family: Consolas, "Courier New", monospace; font-size: 13px; resize: vertical; }
