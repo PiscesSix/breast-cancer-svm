@@ -52,7 +52,9 @@ def test_predict_flat_and_wrapped_payloads_agree(client, features):
     flat = client.post("/predict", json=features)
     wrapped = client.post("/predict", json={"features": features})
     assert flat.status_code == wrapped.status_code == 200
-    assert flat.json() == wrapped.json()
+    a, b = flat.json(), wrapped.json()
+    assert a.pop("inference_ms") >= 0 and b.pop("inference_ms") >= 0  # timing differs per call
+    assert a == b
 
 
 def test_prediction_label_follows_the_threshold(client, features):

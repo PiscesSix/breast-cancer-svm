@@ -1,5 +1,6 @@
-"""Model-API routes used by the dashboard: classes, dataset statistics, PCA, model comparison and
-the test-set scores of the deployed model (for the interactive threshold analysis).
+"""Model-API routes used by the dashboard: classes, dataset statistics, PCA, model comparison, the
+test-set scores of the deployed model (for the interactive threshold analysis) and the permutation
+importance of its features.
 
 Every number returned here is computed from load_breast_cancer, the saved artifact or
 reports/comparison.json; the web pages render them as-is and hard-code nothing.
@@ -14,6 +15,8 @@ from functools import lru_cache
 import numpy as np
 from fastapi import APIRouter, Depends, HTTPException
 from sklearn.decomposition import PCA
+from sklearn.inspection import permutation_importance
+from sklearn.metrics import roc_auc_score
 from sklearn.preprocessing import StandardScaler
 
 import security
@@ -127,6 +130,44 @@ def test_scores():
         "target_sensitivity": service.metadata["target_sensitivity"],
         "items": [{"id": i, "label": label, "proba_malignant": p} for (i, label), p in zip(rows, proba, strict=True)],
     }
+
+
+PERMUTATION_REPEATS = 10
+
+
+@lru_cache(maxsize=1)
+def _permutation_importance(model_version: str) -> dict:
+    names = service.metadata["feature_names"]
+    class_id = {label: int(cid) for cid, label in service.metadata["class_mapping"].items()}
+    X = np.array([[s["features"][n] for n in names] for s in service.samples], dtype=float)
+    y = np.array([class_id[s["label"]] for s in service.samples])
+    # ROC-AUC does not depend on the decision threshold, so the ranking is the same at any slider value.
+    result = permutation_importance(service.model, X, y, scoring="roc_auc", n_repeats=PERMUTATION_REPEATS,
+                                    random_state=42)
+    baseline = roc_auc_score(y, service.model.predict_proba(X)[:, 1])
+    order = np.argsort(-result.importances_mean)
+    return {
+        "model_version": model_version,
+        "scoring": "roc_auc",
+        "baseline_score": round(float(baseline), 4),
+        "n_samples": int(len(y)),
+        "n_repeats": PERMUTATION_REPEATS,
+        "items": [{"feature": names[i], "feature_vi": feature_vi(names[i]),
+                   "mean": round(float(result.importances_mean[i]), 5),
+                   "std": round(float(result.importances_std[i]), 5)} for i in order],
+    }
+
+
+@router.get("/analysis/permutation-importance", tags=["Phân tích"])
+def permutation_importance_endpoint():
+    """Permutation importance of the 30 features on the test split (drop in ROC-AUC when one column is shuffled).
+
+    SVC with an RBF kernel has neither coef_ nor feature_importances_, so importance is measured by
+    shuffling each feature 10 times and recording how much the test ROC-AUC falls.
+    """
+    if not service.ready:
+        raise HTTPException(503, service.error or "Mô hình chưa sẵn sàng")
+    return _permutation_importance(service.metadata["model_version"])
 
 
 def _require_report() -> dict:

@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import json
 import random
+import time
 from pathlib import Path
 
 import joblib
@@ -90,7 +91,9 @@ class ModelService:
 
     def predict(self, rows: list[dict[str, float]]) -> list[dict]:
         X = self.build_matrix(rows)
+        started = time.perf_counter()
         proba = self.model.predict_proba(X)[:, self._proba_col]
+        inference_ms = (time.perf_counter() - started) * 1000 / len(rows)
         mapping = self.metadata["class_mapping"]
         results = []
         for p in proba:
@@ -103,6 +106,7 @@ class ModelService:
                 "probability_malignant": round(float(p), 4),
                 "probability_benign": round(float(1 - p), 4),
                 "threshold_malignant": round(self.threshold, 4),
+                "inference_ms": round(inference_ms, 3),
                 "model_version": self.metadata["model_version"],
                 "warning": self.metadata["warning"],
             })

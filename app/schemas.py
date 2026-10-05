@@ -100,6 +100,7 @@ class PredictionResponse(BaseModel):
     probability_malignant: float
     probability_benign: float
     threshold_malignant: float = Field(description="Dự đoán ác tính khi probability_malignant >= ngưỡng này")
+    inference_ms: float = Field(description="Thời gian predict_proba phía server cho mỗi mẫu (ms)")
     model_version: str
     warning: str
 
