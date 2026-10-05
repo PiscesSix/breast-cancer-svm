@@ -9,6 +9,7 @@ from pydantic import BaseModel, Field, field_validator
 
 import security
 from db_api.db import get_conn, utc_now
+from db_api.explorer import viewer_usernames
 
 router = APIRouter(prefix="/auth", tags=["Tài khoản"])
 
@@ -45,6 +46,8 @@ def create_user(conn, username: str, password: str) -> int:
 @router.post("/register", status_code=status.HTTP_201_CREATED)
 def register(body: Credentials, conn=Depends(get_conn)):
     """Create an account (password hashed with bcrypt) and log it in."""
+    if body.username.lower() in viewer_usernames():
+        raise HTTPException(409, "Tên đăng nhập này được dành riêng")
     try:
         user_id = create_user(conn, body.username, body.password)
     except sqlite3.IntegrityError:

@@ -15,13 +15,19 @@ function Run([string[]]$cmd) {
     if ($LASTEXITCODE -ne 0) { throw "Lệnh thất bại: $($cmd -join ' ')" }
 }
 
-# .env with a shared JWT_SECRET: the database API issues tokens, the model API verifies them.
+# .env with a shared JWT_SECRET (the database API issues tokens, the model API verifies them)
+# and a random ADMIN_PASSWORD for the "Dữ liệu SQL" page's admin account.
 function Ensure-Env {
     if (-not (Test-Path ".env")) {
         $secret = & $py -c "import secrets; print(secrets.token_urlsafe(48))"
-        (Get-Content ".env.example" -Encoding UTF8) -replace "^JWT_SECRET=$", "JWT_SECRET=$secret" |
-            Set-Content ".env" -Encoding UTF8
-        Write-Host "Đã tạo .env (JWT_SECRET mới)" -ForegroundColor Green
+        $admin = & $py -c "import secrets; print(secrets.token_urlsafe(12))"
+        (Get-Content ".env.example" -Encoding UTF8) -replace "^JWT_SECRET=$", "JWT_SECRET=$secret" `
+            -replace "^ADMIN_PASSWORD=$", "ADMIN_PASSWORD=$admin" | Set-Content ".env" -Encoding UTF8
+        Write-Host "Đã tạo .env (JWT_SECRET mới). Tài khoản trang Dữ liệu SQL: admin / $admin" -ForegroundColor Green
+    } elseif (-not (Select-String -Path ".env" -Pattern "^ADMIN_PASSWORD=." -Quiet)) {
+        $admin = & $py -c "import secrets; print(secrets.token_urlsafe(12))"
+        Add-Content ".env" "ADMIN_PASSWORD=$admin" -Encoding UTF8
+        Write-Host "Đã thêm ADMIN_PASSWORD vào .env. Tài khoản trang Dữ liệu SQL: admin / $admin" -ForegroundColor Green
     }
 }
 
@@ -36,7 +42,7 @@ switch ($Task) {
     "test"      { Run @("-m", "pytest") }
     "lint"      { Run @("-m", "ruff", "check", ".") }
     # One process, like Render: dashboard at http://127.0.0.1:8000/
-    "run"       { $env:SERVICE_MODE = "single"; Run @("-m", "uvicorn", "app.main:app", "--reload", "--host", "127.0.0.1", "--port", "8000") }
+    "run"       { Ensure-Env; $env:SERVICE_MODE = "single"; Run @("-m", "uvicorn", "app.main:app", "--reload", "--host", "127.0.0.1", "--port", "8000") }
     # Three modules on three ports: web :8080, model API :8000, database API :8001
     "run-split" {
         Ensure-Env

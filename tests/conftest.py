@@ -18,6 +18,7 @@ _TMP = Path(tempfile.mkdtemp(prefix="bc-tests-"))
 os.environ["DB_PATH"] = str(_TMP / "test.db")
 os.environ["JWT_SECRET"] = "test-secret-key-that-is-long-enough-for-hs256"
 os.environ["SERVICE_MODE"] = "single"
+os.environ["ADMIN_PASSWORD"] = ADMIN_PASSWORD = "admin-test-pass"
 
 from fastapi.testclient import TestClient  # noqa: E402
 

@@ -4,7 +4,7 @@
 # numbers in the report, the slides and the live API are the same model. PYTHON_VERSION and
 # requirements.txt are pinned to the environment that trained artifacts/breast_cancer_svm.joblib.
 # The free plan has no persistent disk: SQLite is recreated at every start and seed.py puts the
-# demo account (demo / demo123) and the first model comparison back.
+# demo and admin accounts, the WDBC table and the first model comparison back.
 services:
   - type: web
     name: breast-cancer-svm-api
@@ -21,4 +21,8 @@ services:
         value: single
       # Signing key for the login tokens, generated once by Render; never committed.
       - key: JWT_SECRET
+        generateValue: true
+      # Password of the "admin" account, the only one allowed on the "Dữ liệu SQL" page
+      # (Render generates it; read it in the service's Environment tab).
+      - key: ADMIN_PASSWORD
         generateValue: true

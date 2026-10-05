@@ -10,6 +10,7 @@ const ROUTES = {
   "chan-doan": { module: "./pages/diagnose.js", label: "Chẩn đoán SVM", icon: "microscope", group: "main" },
   "so-sanh": { module: "./pages/compare.js", label: "So sánh mô hình", icon: "chart-column", group: "main" },
   "lich-su": { module: "./pages/history.js", label: "Lịch sử", icon: "history", group: "main" },
+  "du-lieu-sql": { module: "./pages/sql.js", label: "Dữ liệu SQL", icon: "database", group: "main", badge: "SQL" },
   "phan-tich": { module: "./pages/analysis.js", label: "Phân tích nâng cao", icon: "chart-scatter", group: "highlight" },
   "dang-nhap": { module: "./pages/login.js", label: "Đăng nhập", icon: "log-in", group: "hidden" },
 };
@@ -52,7 +53,8 @@ const LINEART = `
 function navItem(name) {
   const r = ROUTES[name];
   const active = state.route === name ? " active" : "";
-  return `<a class="nav-item${active}" href="#/${name}">${icon(r.icon, 18)}<span>${esc(r.label)}</span></a>`;
+  const badge = r.badge ? `<span class="nav-badge">${esc(r.badge)}</span>` : "";
+  return `<a class="nav-item${active}" href="#/${name}">${icon(r.icon, 18)}<span>${esc(r.label)}</span>${badge}</a>`;
 }
 
 function renderSidebar() {

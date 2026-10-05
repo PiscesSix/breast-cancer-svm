@@ -1,4 +1,4 @@
-"""Database API: users and JWT auth, prediction history, training runs, Excel export.
+"""Database API: users and JWT auth, prediction history, training runs, Excel export, read-only SQL.
 
 Run on its own port:  uvicorn db_api.main:app --port 8001
 In single-service mode app.py mounts this app under /db instead.
@@ -10,12 +10,13 @@ from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 import settings
-from db_api import auth, export, history, runs
+from db_api import auth, explorer, export, history, runs
 from db_api.db import get_conn
 
 app = FastAPI(
     title="Breast Cancer Database API",
-    description="Người dùng (bcrypt + JWT), lịch sử dự đoán, kết quả đánh giá các lần train và xuất Excel.",
+    description="Người dùng (bcrypt + JWT), lịch sử dự đoán, kết quả đánh giá các lần train, xuất Excel "
+                "và trang Dữ liệu SQL chỉ đọc (bảng wdbc 569 mẫu).",
     version="1.0.0",
 )
 
@@ -41,3 +42,4 @@ app.include_router(auth.router)
 app.include_router(history.router)
 app.include_router(runs.router)
 app.include_router(export.router)
+app.include_router(explorer.router)
